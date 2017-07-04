@@ -1,0 +1,6 @@
+package: .
+import:
+- package: github.com/go-openapi/spec
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/openapi
