@@ -40,8 +40,8 @@ $ openapi2jsonschema output.json -o configs/ --stand-alone
 Install [jsonschema tool](https://github.com/Julian/jsonschema) locally
 
 ```bash
-$ jsonschema -F "{error.message}" -i ./configs/db.json ./configs/appspec.json 
+$ jsonschema -F "{error.message}" -i ./example/db.json ./configs/appspec.json 
 ```
 
 The file [appspec.json](./configs/appspec.json) has schema for validating kedge.
-The above file [db.json](./configs/db.json) is taken from [kedge repo example](https://github.com/kedgeproject/kedge/blob/master/examples/envFrom/db.yaml).
+The above file [db.json](./example/db.json) is taken from [kedge repo example](https://github.com/kedgeproject/kedge/blob/master/examples/envFrom/db.yaml).
