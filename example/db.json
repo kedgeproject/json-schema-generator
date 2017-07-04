@@ -1,0 +1,44 @@
+{
+  "name": "database",
+  "containers": [
+    {
+      "name": "db",
+      "image": "mariadb:10",
+      "env": [
+        {
+          "name": "MYSQL_ROOT_PASSWORD",
+          "value": "rootpasswd"
+        },
+        {
+          "name": "MYSQL_PASSWORD",
+          "value": "wordpress"
+        }
+      ],
+      "envFrom": [
+        {
+          "configMapRef": {
+            "name": "database"
+          }
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "name": "database",
+      "ports": [
+        {
+          "port": 3306
+        }
+      ]
+    }
+  ],
+  "configMaps": [
+    {
+      "data": {
+        "MYSQL_DATABASE": "wordpress",
+        "MYSQL_USER": "wordpress"
+      }
+    }
+  ]
+}
