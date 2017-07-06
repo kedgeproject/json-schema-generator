@@ -155,47 +155,6 @@ var kedgeSpec = `{
   }
 }`
 
-//func findKey(k string) string {
-//	t := strings.Split(k, "/")
-//	return t[len(t)-1]
-//}
-
-//func findNeededDefs(alldefs spec.Definitions, queue map[string]int, defs spec.Definitions) {
-//	for k := range queue {
-//		delete(queue, k)
-//		defKey := findKey(k)
-//
-//		v, ok := alldefs[defKey]
-//		if ok {
-//			defs[defKey] = v
-//		}
-//
-//		for propKey := range v.Properties {
-//			if v.Properties[propKey].Items != nil {
-//				if v.Properties[propKey].Items.Schema != nil {
-//					if _, ok := defs[findKey(v.Properties[propKey].Items.Schema.Ref.String())]; !ok{
-//						queue[v.Properties[propKey].Items.Schema.Ref.String()] = 0
-//					}
-//				}
-//			} else {
-//				s := v.Properties[propKey]
-//				if _, ok := defs[findKey(s.Ref.String())]; !ok {
-//					queue[s.Ref.String()] = 0
-//				}
-//			}
-//		}
-//	}
-//
-//	//PrintDefs(defs)
-//	//fmt.Println("queue state: ", queue)
-//	//var a int
-//	//fmt.Scanf("%d", &a)
-//
-//	if len(queue) != 0 {
-//		findNeededDefs(alldefs, queue, defs)
-//	}
-//}
-
 func main() {
 	filename := "swagger.json"
 
@@ -207,12 +166,7 @@ func main() {
 	api := &openapi.OpenAPIDefinition{}
 	err = json.Unmarshal(content, &api.Schema)
 
-	//remaining := map[string]int{
-	//	"#/definitions/io.k8s.api.core.v1.Probe": 0,
-	//}
-
 	defs := generateBarekedgeSpec(api.Schema.SchemaProps.Definitions)
-	//findNeededDefs(api.Schema.SchemaProps.Definitions, remaining, defs)
 
 	// add defs to openapi
 	for k, v := range defs {
@@ -267,6 +221,5 @@ func generateBarekedgeSpec(k8sSpec spec.Definitions) spec.Definitions {
 	for _, m := range augmentMapping {
 		augmentProperties(k8sSpec[m.s], defs[m.t])
 	}
-
 	return defs
 }
