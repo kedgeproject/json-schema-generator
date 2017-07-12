@@ -13,6 +13,7 @@ import (
 	"github.com/fatih/structtag"
 	"github.com/go-openapi/jsonreference"
 	"github.com/go-openapi/spec"
+	"github.com/pkg/errors"
 )
 
 type sd struct {
@@ -48,7 +49,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 		//}
 
 		// get the field name from the json tag
-		name, err := JSONTagToFieldName(sf.Tag.Value)
+		name, err := JSONTagName(sf.Tag.Value)
 		if err != nil {
 			panic(err)
 		}
@@ -253,17 +254,27 @@ func GetStructFieldDesc(cg *ast.CommentGroup) (desc string, ref string, optional
 	return strings.TrimSpace(desc), strings.TrimSpace(ref), optional
 }
 
-func JSONTagToFieldName(j string) (string, error) {
-	//fmt.Println("tag:", j)
+// If given a JSON tag this will extract struct field name
+// out of it. For e.g. if a json tag is like this
+// `json:"persistentVolumes,omitempty"`
+// This function will return 'persistentVolumes'
+func JSONTagName(j string) (string, error) {
+	// The tag that we get has double quotes which are escaped
+	// using forward slashes this will remove them
 	j, err := strconv.Unquote(j)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "could not unquote jsontag name")
 	}
 
+	// parsing the jsontag using fatih arslan's library
 	tags, err := structtag.Parse(j)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "could not parse jsontag")
 	}
+
+	// as of now we assume that we have only one tag
+	// in future if there is a use case where multiple
+	// tags needed to be handled we make change here
 	if len(tags.Tags()) > 1 {
 		return "", fmt.Errorf("more than one tag found")
 	}
