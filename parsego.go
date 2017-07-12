@@ -53,7 +53,10 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 		if err != nil {
 			panic(err)
 		}
-		fieldtype := GetOpenAPIType(sf.Type)
+		fieldtype, err := GetStructFieldType(sf.Type)
+		if err != nil {
+			panic(err)
+		}
 		if fieldtype == "" {
 			id, ok := sf.Type.(*ast.Ident)
 			if !ok {
@@ -187,52 +190,67 @@ func main() {
 	//ast.Fprint(os.Stdout, fset, node, nil)
 }
 
-func GetOpenAPIType(g interface{}) string {
-	t, ok := g.(*ast.Ident)
-	if ok {
-		switch t.Name {
-		case "string":
-			return "string"
-		default:
-			//panic(fmt.Sprintf("no type found: %s", t.Name))
-			return ""
+// Returns string form of the struct field type
+// if the type is not recognized then errors out
+func GetStructFieldType(g interface{}) (string, error) {
+	switch v := g.(type) {
+	case *ast.Ident:
+		// normal fields like following are identifiers
+		// e.g.
+		// Name string `json:"name"`
+		// TODO: handle other types like int or bool
+		if v.Name == "string" {
+			return "string", nil
+		} else {
+			// this could cause problems for types that are identifiers and not string
+			// so not adding it now because fields that are defined in same package
+			// and embedded will cause problems e.g.
+			// PodSpecMod `json:",inline"`
+			// for builtin types keep adding checks in this if block
+			// not adding check for 'PodSpecMod' so that we don't have to
+			// edit this on every new addition of our defined field
+			return "", nil
 		}
-	}
-
-	mt, ok := g.(*ast.MapType)
-	if ok {
-		k, ok1 := mt.Key.(*ast.Ident)
-		v, ok2 := mt.Value.(*ast.Ident)
+	case *ast.MapType:
+		// fields like following are of map type
+		// e.g.
+		// Data map[string]string `json:"data,omitempty"`
+		key, ok1 := v.Key.(*ast.Ident)
+		value, ok2 := v.Value.(*ast.Ident)
 		if ok1 && ok2 {
-			if k.Name == "string" && v.Name == "string" {
-				return "object"
+			// TODO: only checking for string key and value
+			// if needed also add other types of maps
+			if key.Name == "string" && value.Name == "string" {
+				return "object", nil
 			} else {
-				panic("type not found")
+				return "", fmt.Errorf("map types not string")
 			}
 		} else {
-			panic("type not found")
+			// if maps either key or value is not identifier then
+			// maybe handle it differently
+			return "", fmt.Errorf("map key or value not identifier")
 		}
+	case *ast.ArrayType:
+		// e.g.
+		// Ports []ServicePortMod `json:"ports"`
+		// above types are arrays
+		return "array", nil
+	case *ast.SelectorExpr:
+		// if the type is from another package then it is of this type
+		// e.g.
+		// api_v1.PersistentVolumeClaimSpec `json:",inline"`
+		return "selectorExpr", nil
+	case *ast.StarExpr:
+		// A StarExpr node represents an expression of the form "*" Expression.
+		// Semantically it could be a unary "*" expression, or a pointer type.
+		// e.g.
+		// ConfigMapRef *ConfigMapEnvSource `json:"configMapRef,omitempty"`
+		return "starexpr", nil
+	default:
+		// if none of above is satisfied then it should be added later
+		// so keeping error so that we know that it is missing
+		return "", fmt.Errorf("unknown type could not identify")
 	}
-
-	_, ok = g.(*ast.ArrayType)
-	if ok {
-		return "array"
-	}
-
-	// api_v1.PersistentVolumeClaimSpec `json:",inline"`
-	_, ok = g.(*ast.SelectorExpr)
-	if ok {
-		return "selectorExpr"
-	}
-
-	// ConfigMapRef *ConfigMapEnvSource `json:"configMapRef,omitempty"`
-	_, ok = g.(*ast.StarExpr)
-	if ok {
-		return "starexpr"
-	}
-
-	panic(fmt.Sprintf("no type found"))
-	return ""
 }
 
 // If given a JSON tag this will extract struct field name
