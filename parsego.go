@@ -23,7 +23,7 @@ type sd struct {
 func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) []sd {
 
 	var mapping []sd
-	key, desc := FindKedgeKeyDocs(spc.Doc)
+	key, desc := ParseStructComments(spc.Doc)
 
 	if key == "" {
 		return mapping
@@ -270,20 +270,31 @@ func JSONTagToFieldName(j string) (string, error) {
 	return tags.Tags()[0].Name, nil
 }
 
-func FindKedgeKeyDocs(cg *ast.CommentGroup) (fqdn, desc string) {
+// Parses comments on top of structs and accordingly returns the
+// description of struct and the kedgeSpec key if any provided
+func ParseStructComments(cg *ast.CommentGroup) (kedgeSpecKey, desc string) {
+	// if no comments are given above struct then just return blank
+	// strings, note the empty return because the way function is defined
 	if cg == nil {
 		return
 	}
+	// iterate on each line of comment
+	// each comment is of the format "// blah blah"
 	for _, c := range cg.List {
 		comment := c.Text
+		// comment also has leading // that we need to get rid of
+		// and then if any space given before that we also need to remove it
 		comment = strings.TrimSpace(strings.TrimPrefix(comment, "//"))
+
+		// check if the comment line specifies the key of 'kedgeSpec'
+		// else it is normal comment so add it to the description
 		if strings.HasPrefix(comment, "kedgeSpec:") {
-			fqdn = strings.TrimSpace(strings.Split(comment, ":")[1])
+			kedgeSpecKey = strings.TrimSpace(strings.Split(comment, ":")[1])
 		} else {
 			desc = desc + comment + " "
 		}
 	}
-	return fqdn, strings.TrimSpace(desc)
+	return kedgeSpecKey, strings.TrimSpace(desc)
 }
 
 func PrintDefs(v interface{}) {

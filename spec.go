@@ -130,8 +130,6 @@ type PodSpecMod struct {
 type App struct {
 	// Name of the micro-service
 	Name string `json:"name"`
-	// +optional
-	Replicas *int32 `json:"replicas,omitempty"`
 	// Map of string keys and values that can be used to organize and categorize
 	// (scope and select) objects. May match selectors of replication controllers
 	// and services. More info: http://kubernetes.io/docs/user-guide/labels
