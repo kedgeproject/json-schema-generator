@@ -78,7 +78,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 
 		// to extract the description use another function
 		// also see if the field is optional
-		desc, ref, optional := GetStructFieldDesc(sf.Doc)
+		desc, ref, optional := ParseStructFieldComments(sf.Doc)
 
 		if fieldtype == "selectorExpr" {
 			s := sd{t: key, s: ref}
@@ -235,25 +235,6 @@ func GetOpenAPIType(g interface{}) string {
 	return ""
 }
 
-func GetStructFieldDesc(cg *ast.CommentGroup) (desc string, ref string, optional bool) {
-	if cg == nil {
-		return "", "", true
-	}
-
-	for _, c := range cg.List {
-		comment := c.Text
-		comment = strings.TrimSpace(strings.TrimPrefix(comment, "//"))
-		if strings.HasPrefix(comment, "+optional") {
-			optional = true
-		} else if strings.HasPrefix(comment, "ref:") || strings.HasPrefix(comment, "k8s:") {
-			ref = strings.TrimSpace(strings.Split(comment, ":")[1])
-		} else {
-			desc = desc + comment + " "
-		}
-	}
-	return strings.TrimSpace(desc), strings.TrimSpace(ref), optional
-}
-
 // If given a JSON tag this will extract struct field name
 // out of it. For e.g. if a json tag is like this
 // `json:"persistentVolumes,omitempty"`
@@ -279,6 +260,40 @@ func JSONTagName(j string) (string, error) {
 		return "", fmt.Errorf("more than one tag found")
 	}
 	return tags.Tags()[0].Name, nil
+}
+
+// Parses comments on top of struct fields and accordingly returns the
+// description of the field name if any provided, if the field is a reference
+// defined using 'k8s:' or 'ref:' and also returns if the field is optional
+// by looking for line that has '+optional' mentioned
+func ParseStructFieldComments(cg *ast.CommentGroup) (desc string, ref string, optional bool) {
+	// if no comments are given above the field then just return blank
+	// strings, also assume that the field is optional
+	if cg == nil {
+		return "", "", true
+	}
+
+	// iterate on each line of comment
+	// each comment is of the format "// blah blah"
+	for _, c := range cg.List {
+		comment := c.Text
+		// comment also has leading // that we need to get rid of
+		// and then if any space given before that we also need to remove it
+		comment = strings.TrimSpace(strings.TrimPrefix(comment, "//"))
+
+		if strings.HasPrefix(comment, "+optional") {
+			// if the field is has optional mentioned mark the boolean as true
+			optional = true
+		} else if strings.HasPrefix(comment, "ref:") || strings.HasPrefix(comment, "k8s:") {
+			// if this is reference either mentioned using 'ref' or 'k8s'
+			// we remove the leading 'ref' or 'k8s' and return rest
+			ref = strings.TrimSpace(strings.Split(comment, ":")[1])
+		} else {
+			// if none of above special cases then this is normal description
+			desc = desc + comment + " "
+		}
+	}
+	return strings.TrimSpace(desc), strings.TrimSpace(ref), optional
 }
 
 // Parses comments on top of structs and accordingly returns the
