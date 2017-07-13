@@ -1,15 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"os"
 	"strconv"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/fatih/structtag"
 	"github.com/go-openapi/jsonreference"
 	"github.com/go-openapi/spec"
@@ -36,8 +37,11 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 
 	// iterate all the fields of struct
 	for _, sf := range strct.Fields.List {
-		fmt.Println(sf.Names)
-		ast.Fprint(os.Stdout, fset, sf, nil)
+
+		log.Debugln("Field name:", sf.Names)
+		var b bytes.Buffer
+		ast.Fprint(&b, fset, sf, nil)
+		log.Debug(b.String())
 
 		// get the field name from the json tag
 		name, err := JSONTagName(sf.Tag.Value)
@@ -64,7 +68,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 			continue
 		case "selectorExpr":
 			s := sd{t: key, s: ref}
-			fmt.Println("adding s: ", s)
+			log.Debugf("add mapping {%q: %q}", s.t, s.s)
 			mapping = append(mapping, s)
 			continue
 		}
@@ -86,13 +90,13 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 func main() {
 	fset := token.NewFileSet() // positions are relative to fset
 	defs := spec.Definitions(make(map[string]spec.Schema))
+	log.SetLevel(log.DebugLevel)
 
 	// Parse the file containing this very example
 	// but stop after processing the imports.
 	node, err := parser.ParseFile(fset, "spec.go", nil, parser.ParseComments)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatalln(err)
 	}
 	var mapping []sd
 
@@ -103,26 +107,21 @@ func main() {
 			continue
 		}
 		for _, s := range spc.Specs {
-
 			//fmt.Printf("Struct Name: %s\ncomments: %s\n", stc.Name.Name, spc.Doc.Text())
-
 			strct, ok := TypeSpecToStruct(s)
 			if !ok {
 				continue
 			}
 			mapping = append(mapping, ParseStruct(strct, spc, defs, fset)...)
 		}
-		PrintDefs(defs)
+		PrintJSON(defs)
 	}
 
-	fmt.Println("mapping")
+	log.Debugln("Mapping:")
 	for _, s := range mapping {
-		fmt.Println(s.t, "-", s.s)
+		log.Debugln(s.t, "-", s.s)
 	}
-
-	//PrintDefs(mapping)
-	PrintDefs(defs)
-	//ast.Fprint(os.Stdout, fset, node, nil)
+	PrintJSON(defs)
 }
 
 // Given two lists adds them, but only adds unique items
@@ -374,10 +373,10 @@ func ParseStructComments(cg *ast.CommentGroup) (kedgeSpecKey, desc string) {
 	return kedgeSpecKey, strings.TrimSpace(desc)
 }
 
-func PrintDefs(v interface{}) {
+func PrintJSON(v interface{}) {
 	b, e := json.MarshalIndent(v, "", "  ")
 	if e != nil {
-		fmt.Println(e)
+		log.Fatalln(e)
 	}
-	fmt.Println(string(b))
+	log.Debugln(string(b))
 }
