@@ -17,74 +17,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type sd struct {
-	t string
-	s string
-}
-
-func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) []sd {
-	var mapping []sd
-
-	key, desc := ParseStructComments(spc.Doc)
-	// Some fields are normal structs and are not part of
-	// of schema, this can mostly happen when the struct is
-	// embedded without redefining a key for it. e.g.
-	// type PodSpecMod struct {
-	if key == "" {
-		return mapping
-	}
-	CreateOpenAPIDefinition(key, desc, defs)
-
-	// iterate all the fields of struct
-	for _, sf := range strct.Fields.List {
-
-		log.Debugln("Field name:", sf.Names)
-		var b bytes.Buffer
-		ast.Fprint(&b, fset, sf, nil)
-		log.Debug(b.String())
-
-		// get the field name from the json tag
-		name, err := JSONTagName(sf.Tag.Value)
-		if err != nil {
-			panic(err)
-		}
-		fieldtype, err := GetStructFieldType(sf.Type)
-		if err != nil {
-			panic(err)
-		}
-		desc, ref, optional := ParseStructFieldComments(sf.Doc)
-
-		switch fieldtype {
-		case "":
-			identifier, ok := sf.Type.(*ast.Ident)
-			if !ok {
-				continue
-			}
-			s, ok := TypeSpecToStruct(identifier.Obj.Decl)
-			if !ok {
-				continue
-			}
-			mapping = append(mapping, ParseStruct(s, spc, defs, fset)...)
-			continue
-		case "selectorExpr":
-			s := sd{t: key, s: ref}
-			log.Debugf("add mapping {%q: %q}", s.t, s.s)
-			mapping = append(mapping, s)
-			continue
-		}
-
-		schema, err := CreateSchema(fieldtype, desc, ref)
-		if err != nil {
-			panic(err)
-		}
-		defs[key].Properties[name] = schema
-		if !optional && name != "" {
-			f := defs[key]
-			f.Required = append(f.Required, name)
-			defs[key] = f
-		}
-	}
-	return mapping
+type injection struct {
+	target string
+	source string
 }
 
 func main() {
@@ -98,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	var mapping []sd
+	var mapping []injection
 
 	// search for the declaration of App struct
 	for _, decl := range node.Decls {
@@ -112,16 +47,114 @@ func main() {
 			if !ok {
 				continue
 			}
-			mapping = append(mapping, ParseStruct(strct, spc, defs, fset)...)
+			m, err := ParseStruct(strct, spc, defs, fset)
+			if err != nil {
+				log.Errorln(err)
+				continue
+			}
+			mapping = append(mapping, m...)
 		}
 		PrintJSON(defs)
 	}
 
 	log.Debugln("Mapping:")
 	for _, s := range mapping {
-		log.Debugln(s.t, "-", s.s)
+		log.Debugln(s.target, "-", s.source)
 	}
 	PrintJSON(defs)
+}
+
+// Parses a struct object and creates a definition which is added with the key
+// as specified in the comments of struct definition, also adds the keys as mentioned
+// identifies the type of the fields and converts them into as needed by openapi
+func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) ([]injection, error) {
+	var mapping []injection
+
+	key, desc := ParseStructComments(spc.Doc)
+	// Some fields are normal structs and are not part of
+	// of schema, this can mostly happen when the struct is
+	// embedded without redefining a key for it. e.g.
+	// type PodSpecMod struct {
+	if key == "" {
+		return mapping, nil
+	}
+	CreateOpenAPIDefinition(key, desc, defs)
+
+	// iterate all the fields of struct
+	for _, sf := range strct.Fields.List {
+
+		log.Debugln("Field name:", sf.Names)
+		// To print using logrus we need to make the ast function
+		// to write to bytes.Buffer and then extract string out of it
+		var b bytes.Buffer
+		ast.Fprint(&b, fset, sf, nil)
+		log.Debug(b.String())
+
+		// get the field name from the json tag
+		name, err := JSONTagName(sf.Tag.Value)
+		if err != nil {
+			return mapping, errors.Wrapf(err, "name extraction from json tag error: %v", sf.Names)
+		}
+
+		// Find what is the type of struct field
+		fieldtype, err := GetStructFieldType(sf.Type)
+		if err != nil {
+			return mapping, errors.Wrapf(err, "could not find the struct field type: %v", sf.Names)
+		}
+
+		// Parse comments written on top of struct field and then find the description
+		// reference if any and see if the field is optional
+		desc, ref, optional := ParseStructFieldComments(sf.Doc)
+
+		// special cases of field types, after finding which we will do
+		// some different processing rather than adding it to 'defs'
+		switch fieldtype {
+		case "":
+			// this case will happen when we embed a struct in another
+			// and if the struct is defined locally in same package
+			// e.g.: PodSpecMod `json:",inline"`
+			identifier, ok := sf.Type.(*ast.Ident)
+			if !ok {
+				continue
+			}
+			s, ok := TypeSpecToStruct(identifier.Obj.Decl)
+			if !ok {
+				continue
+			}
+			log.Debugln("Making a recursive call")
+			m, err := ParseStruct(s, spc, defs, fset)
+			if err != nil {
+				log.Errorln(err)
+				continue
+			}
+			mapping = append(mapping, m...)
+			continue
+		case "selectorExpr":
+			// This is case we have embedded a type from another package
+			// so we just add it as mapping to so that we can inject the
+			// definitions from that struct to our own definition
+			s := injection{target: key, source: ref}
+			log.Debugf("add mapping {%q: %q}", s.target, s.source)
+			mapping = append(mapping, s)
+			continue
+		}
+
+		// for other types we just create schema and depending on the type
+		// this will add necessary things
+		schema, err := CreateSchema(fieldtype, desc, ref)
+		if err != nil {
+			return mapping, errors.Wrapf(err, "error creating schema: %v", sf.Names)
+		}
+		defs[key].Properties[name] = schema
+
+		// also if the field is not optional then add it to the required list
+		if !optional && name != "" {
+			f := defs[key]
+			f.Required = append(f.Required, name)
+			defs[key] = f
+		}
+	}
+	return mapping, nil
 }
 
 // Given two lists adds them, but only adds unique items
