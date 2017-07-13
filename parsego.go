@@ -22,31 +22,22 @@ type sd struct {
 }
 
 func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) []sd {
-
 	var mapping []sd
-	key, desc := ParseStructComments(spc.Doc)
 
+	key, desc := ParseStructComments(spc.Doc)
+	// Some fields are normal structs and are not part of
+	// of schema, this can mostly happen when the struct is
+	// embedded without redefining a key for it. e.g.
+	// type PodSpecMod struct {
 	if key == "" {
 		return mapping
 	}
-
-	if _, ok := defs[key]; !ok {
-		defs[key] = spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: desc,
-				Properties:  make(map[string]spec.Schema),
-			},
-		}
-	}
+	CreateOpenAPIDefinition(key, desc, defs)
 
 	// iterate all the fields of struct
 	for _, sf := range strct.Fields.List {
 		fmt.Println(sf.Names)
 		ast.Fprint(os.Stdout, fset, sf, nil)
-
-		//if sf.Names == nil {
-		//	continue
-		//}
 
 		// get the field name from the json tag
 		name, err := JSONTagName(sf.Tag.Value)
@@ -63,10 +54,6 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 				continue
 			}
 
-			//obj, ok := id.Obj.Decl
-			//if !ok {
-			//	continue
-			//}
 			ts, ok := id.Obj.Decl.(*ast.TypeSpec)
 			if !ok {
 				continue
@@ -79,60 +66,17 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 			continue
 		}
 
-		// to extract the description use another function
-		// also see if the field is optional
 		desc, ref, optional := ParseStructFieldComments(sf.Doc)
-
 		if fieldtype == "selectorExpr" {
 			s := sd{t: key, s: ref}
 			fmt.Println("adding s: ", s)
 			mapping = append(mapping, s)
 			continue
 		}
-
-		schema := spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: desc,
-				Type:        spec.StringOrArray([]string{fieldtype}),
-			},
+		schema, err := CreateSchema(fieldtype, desc, ref)
+		if err != nil {
+			panic(err)
 		}
-
-		if fieldtype == "object" {
-			schema.AdditionalProperties = &spec.SchemaOrBool{
-				Schema: &spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Type: spec.StringOrArray([]string{"string"}),
-					},
-				},
-			}
-		}
-		if fieldtype == "array" {
-			ref = "#/definitions/" + ref
-			refObj, err := jsonreference.New(ref)
-			if err != nil {
-				panic(err)
-			}
-			schema.Items = &spec.SchemaOrArray{
-				Schema: &spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Ref: spec.Ref{
-							refObj,
-						},
-					},
-				},
-			}
-		}
-
-		if fieldtype == "starexpr" {
-			ref = "#/definitions/" + ref
-			refObj, err := jsonreference.New(ref)
-			if err != nil {
-				panic(err)
-			}
-			schema.Ref = spec.Ref{refObj}
-			schema.Type = nil
-		}
-
 		defs[key].Properties[name] = schema
 		if !optional && name != "" {
 			f := defs[key]
@@ -188,6 +132,73 @@ func main() {
 	//PrintDefs(mapping)
 	PrintDefs(defs)
 	//ast.Fprint(os.Stdout, fset, node, nil)
+}
+
+// Schema the schema object allows the definition of input and output data types.
+// This will be added to definitions we have
+func CreateSchema(fieldtype, desc, ref string) (spec.Schema, error) {
+	schema := spec.Schema{
+		SchemaProps: spec.SchemaProps{
+			Description: desc,
+			Type:        spec.StringOrArray([]string{fieldtype}),
+		},
+	}
+	switch fieldtype {
+	case "object":
+		schema.AdditionalProperties = &spec.SchemaOrBool{
+			Schema: &spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Type: spec.StringOrArray([]string{"string"}),
+				},
+			},
+		}
+	case "array":
+		refObj, err := CreateJSONRef(ref)
+		if err != nil {
+			return schema, errors.Wrapf(err, "error extracting name from json tag")
+		}
+		// an array of objects is list of objects being referred from somewhere
+		// else so using
+		schema.Items = &spec.SchemaOrArray{
+			Schema: &spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Ref: spec.Ref{
+						refObj,
+					},
+				},
+			},
+		}
+	case "starexpr":
+		refObj, err := CreateJSONRef(ref)
+		if err != nil {
+			return schema, errors.Wrapf(err, "error extracting name from json tag")
+		}
+		schema.Ref = spec.Ref{refObj}
+		// This was removed because all data is coming from that ref
+		// there is no type called "starexpr" but this is more for knowing
+		// that we need to refernce it directly
+		schema.Type = nil
+	}
+	return schema, nil
+}
+
+// Creates a JSON reference type object from normal string
+func CreateJSONRef(ref string) (jsonreference.Ref, error) {
+	ref = "#/definitions/" + ref
+	return jsonreference.New(ref)
+}
+
+// Given kedgeSpecKey and description for a struct this adds the entry
+// for that particular key to defs, if not present already
+func CreateOpenAPIDefinition(key, desc string, defs spec.Definitions) {
+	if _, ok := defs[key]; !ok {
+		defs[key] = spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: desc,
+				Properties:  make(map[string]spec.Schema),
+			},
+		}
+	}
 }
 
 // Returns string form of the struct field type
