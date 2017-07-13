@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/go-openapi/spec"
 	"k8s.io/apimachinery/pkg/openapi"
 )
@@ -156,70 +157,56 @@ var kedgeSpec = `{
 }`
 
 func main() {
-	filename := "swagger.json"
+	//log.SetLevel(log.DebugLevel)
 
+	defs, mapping, err := GenerateOpenAPIDefinitions("spec.go")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	filename := "swagger.json"
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Printf("cannot read file %q: %v\n", filename, err)
+		log.Fatalf("cannot read file %q: %v\n", filename, err)
 	}
 
 	api := &openapi.OpenAPIDefinition{}
 	err = json.Unmarshal(content, &api.Schema)
+	if err != nil {
+		log.Fatalf("error unmarshalling into open API definition: %v", err)
+	}
 
-	defs := generateBarekedgeSpec(api.Schema.SchemaProps.Definitions)
+	defs = InjectKedgeSpec(api.Schema.SchemaProps.Definitions, defs, mapping)
+	//PrintJSONStdOut(defs)
 
 	// add defs to openapi
 	for k, v := range defs {
 		api.Schema.SchemaProps.Definitions[k] = v
 	}
-	PrintDefs(api.Schema)
+	PrintJSONStdOut(api.Schema)
 }
 
-func PrintDefs(v interface{}) {
-	b, e := json.MarshalIndent(v, "", "  ")
-	if e != nil {
-		fmt.Println(e)
-	}
-	fmt.Println(string(b))
-}
-
-func augmentProperties(s, t spec.Schema) {
+func augmentProperties(s, t spec.Schema) spec.Schema {
 	for k, v := range s.Properties {
 		if _, ok := t.Properties[k]; !ok {
 			t.Properties[k] = v
 		}
 	}
+	t.Required = AddListUniqueItems(t.Required, s.Required)
+	return t
 }
 
-func generateBarekedgeSpec(k8sSpec spec.Definitions) spec.Definitions {
-	// read the string into internal representation
-	defs := spec.Definitions(make(map[string]spec.Schema))
-	if err := json.Unmarshal([]byte(kedgeSpec), &defs); err != nil {
-		fmt.Println(err)
-	}
-
-	// In `io.kedge.ServicePort` add `io.k8s.api.core.v1.ServicePort`
-	// In `io.kedge.AppSpec` add `io.k8s.api.core.v1.PodSpec` and `io.k8s.api.extensions.v1beta1.DeploymentSpec`
-	// In `io.kedge.PersistentVolume` add `io.k8s.api.core.v1.PersistentVolumeClaimSpec`
-	// In `io.kedge.ServiceSpec` add `io.k8s.api.core.v1.ServiceSpec`
-	// In `io.kedge.ServicePort` add `io.k8s.api.core.v1.ServicePort`
-	// In `io.kedge.IngressSpec` add `io.k8s.api.extensions.v1beta1.IngressSpec`
-	// In `io.kedge.ContainerSpec` add `io.k8s.api.core.v1.Container
-	augmentMapping := []struct {
-		t string
-		s string
-	}{
-		{"io.kedge.AppSpec", "io.k8s.api.core.v1.PodSpec"},
-		{"io.kedge.AppSpec", "io.k8s.api.extensions.v1beta1.DeploymentSpec"},
-		{"io.kedge.PersistentVolume", "io.k8s.api.core.v1.PersistentVolumeClaimSpec"},
-		{"io.kedge.ServiceSpec", "io.k8s.api.core.v1.ServiceSpec"},
-		{"io.kedge.ServicePort", "io.k8s.api.core.v1.ServicePort"},
-		{"io.kedge.IngressSpec", "io.k8s.api.extensions.v1beta1.IngressSpec"},
-		{"io.kedge.ContainerSpec", "io.k8s.api.core.v1.Container"},
-	}
-	// then using th custom logic start adding things
-	for _, m := range augmentMapping {
-		augmentProperties(k8sSpec[m.s], defs[m.t])
+func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []Injection) spec.Definitions {
+	for _, m := range mapping {
+		defs[m.Target] = augmentProperties(k8sSpec[m.Source], defs[m.Target])
 	}
 	return defs
+}
+
+func PrintJSONStdOut(v interface{}) {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(b))
 }

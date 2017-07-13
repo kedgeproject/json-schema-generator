@@ -17,58 +17,62 @@ import (
 	"github.com/pkg/errors"
 )
 
-type injection struct {
-	target string
-	source string
+type Injection struct {
+	Target string
+	Source string
 }
 
-func main() {
-	fset := token.NewFileSet() // positions are relative to fset
+// given a golang filename this function will parse the file and generate open api definition
+func GenerateOpenAPIDefinitions(filename string) (spec.Definitions, []Injection, error) {
+	// this has all the definitions which will be parsed from file
 	defs := spec.Definitions(make(map[string]spec.Schema))
-	log.SetLevel(log.DebugLevel)
+	// this stores all the mapping of what object fields to inject into what
+	var mapping []Injection
 
-	// Parse the file containing this very example
-	// but stop after processing the imports.
-	node, err := parser.ParseFile(fset, "spec.go", nil, parser.ParseComments)
+	fset := token.NewFileSet() // positions are relative to fset
+	// Parse the file also parse comments and add them to AST
+	node, err := parser.ParseFile(fset, filename, nil, parser.ParseComments)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, mapping, errors.Wrapf(err, "could not read the go source code")
 	}
-	var mapping []injection
 
-	// search for the declaration of App struct
+	// iterate over all top-level declarations
 	for _, decl := range node.Decls {
-		spc, ok := decl.(*ast.GenDecl)
+		// extract as generic declaration node
+		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
 		}
-		for _, s := range spc.Specs {
-			//fmt.Printf("Struct Name: %s\ncomments: %s\n", stc.Name.Name, spc.Doc.Text())
+		// iterate over all the specifications
+		for _, s := range genDecl.Specs {
+			// if there is a struct type it will be stored in strct
 			strct, ok := TypeSpecToStruct(s)
 			if !ok {
 				continue
 			}
-			m, err := ParseStruct(strct, spc, defs, fset)
+			// function to parse struct
+			m, err := ParseStruct(strct, genDecl, defs, fset)
 			if err != nil {
-				log.Errorln(err)
-				continue
+				return nil, mapping, errors.Wrapf(err, "could not parse struct")
 			}
 			mapping = append(mapping, m...)
 		}
-		PrintJSON(defs)
 	}
 
 	log.Debugln("Mapping:")
 	for _, s := range mapping {
-		log.Debugln(s.target, "-", s.source)
+		log.Debugln(s.Target, "-", s.Source)
 	}
 	PrintJSON(defs)
+
+	return defs, mapping, nil
 }
 
 // Parses a struct object and creates a definition which is added with the key
 // as specified in the comments of struct definition, also adds the keys as mentioned
 // identifies the type of the fields and converts them into as needed by openapi
-func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) ([]injection, error) {
-	var mapping []injection
+func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions, fset *token.FileSet) ([]Injection, error) {
+	var mapping []Injection
 
 	key, desc := ParseStructComments(spc.Doc)
 	// Some fields are normal structs and are not part of
@@ -124,7 +128,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 			log.Debugln("Making a recursive call")
 			m, err := ParseStruct(s, spc, defs, fset)
 			if err != nil {
-				log.Errorln(err)
+				return mapping, errors.Wrapf(err, "could not parse struct")
 				continue
 			}
 			mapping = append(mapping, m...)
@@ -133,8 +137,8 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 			// This is case we have embedded a type from another package
 			// so we just add it as mapping to so that we can inject the
 			// definitions from that struct to our own definition
-			s := injection{target: key, source: ref}
-			log.Debugf("add mapping {%q: %q}", s.target, s.source)
+			s := Injection{Target: key, Source: ref}
+			log.Debugf("add mapping {%q: %q}", s.Target, s.Source)
 			mapping = append(mapping, s)
 			continue
 		}
