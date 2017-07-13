@@ -48,31 +48,27 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 		if err != nil {
 			panic(err)
 		}
-		if fieldtype == "" {
-			id, ok := sf.Type.(*ast.Ident)
-			if !ok {
-				continue
-			}
+		desc, ref, optional := ParseStructFieldComments(sf.Doc)
 
-			ts, ok := id.Obj.Decl.(*ast.TypeSpec)
+		switch fieldtype {
+		case "":
+			identifier, ok := sf.Type.(*ast.Ident)
 			if !ok {
 				continue
 			}
-			s, ok := ts.Type.(*ast.StructType)
+			s, ok := TypeSpecToStruct(identifier.Obj.Decl)
 			if !ok {
 				continue
 			}
 			mapping = append(mapping, ParseStruct(s, spc, defs, fset)...)
 			continue
-		}
-
-		desc, ref, optional := ParseStructFieldComments(sf.Doc)
-		if fieldtype == "selectorExpr" {
+		case "selectorExpr":
 			s := sd{t: key, s: ref}
 			fmt.Println("adding s: ", s)
 			mapping = append(mapping, s)
 			continue
 		}
+
 		schema, err := CreateSchema(fieldtype, desc, ref)
 		if err != nil {
 			panic(err)
@@ -106,16 +102,11 @@ func main() {
 		if !ok {
 			continue
 		}
-		//ast.Fprint(os.Stdout, fset, spc, nil)
 		for _, s := range spc.Specs {
-			stc, ok := s.(*ast.TypeSpec)
-			if !ok {
-				continue
-			}
 
-			fmt.Printf("Struct Name: %s\ncomments: %s\n", stc.Name.Name, spc.Doc.Text())
+			//fmt.Printf("Struct Name: %s\ncomments: %s\n", stc.Name.Name, spc.Doc.Text())
 
-			strct, ok := stc.Type.(*ast.StructType)
+			strct, ok := TypeSpecToStruct(s)
 			if !ok {
 				continue
 			}
@@ -132,6 +123,37 @@ func main() {
 	//PrintDefs(mapping)
 	PrintDefs(defs)
 	//ast.Fprint(os.Stdout, fset, node, nil)
+}
+
+// Given two lists adds them, but only adds unique items
+// Duplicates are removed, using map
+func AddListUniqueItems(a []string, b []string) []string {
+	var merger []string
+	itemsMap := make(map[string]interface{})
+	lists := [][]string{a, b}
+
+	for _, list := range lists {
+		for _, item := range list {
+			itemsMap[item] = nil
+		}
+	}
+
+	for k := range itemsMap {
+		merger = append(merger, k)
+	}
+	return merger
+}
+
+// A TypeSpec node represents a type declaration (TypeSpec production).
+// If given the object of that type returns StructType and boolean
+// if the conversion went well
+func TypeSpecToStruct(t interface{}) (*ast.StructType, bool) {
+	ts, ok := t.(*ast.TypeSpec)
+	if !ok {
+		return nil, ok
+	}
+	strct, ok := ts.Type.(*ast.StructType)
+	return strct, ok
 }
 
 // Schema the schema object allows the definition of input and output data types.
