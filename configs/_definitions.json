@@ -576,7 +576,7 @@
       "properties": {
         "endpoint": {
           "type": "string", 
-          "description": "Host to create ingress automatically"
+          "description": "Host to create ingress automatically. Endpoint allows specifying an ingress resource in the format '<Host>/<Path>'"
         }, 
         "targetPort": {
           "description": "Number or name of the port to access on the pods targeted by the service. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. If this is a string, it will be looked up as a named port in the target Pod's container ports. If this is not specified, the value of the 'port' field is used (an identity map). This field is ignored for services with clusterIP=None, and should be omitted or set equal to the 'port' field. More info: https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service", 
@@ -886,6 +886,18 @@
         "metricName": {
           "type": "string", 
           "description": "metricName is the name of the metric in question."
+        }
+      }
+    }, 
+    "io.kedge.ConfigMapEnvSource": {
+      "required": [
+        "name"
+      ], 
+      "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with. The contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.", 
+      "properties": {
+        "name": {
+          "type": "string", 
+          "description": "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names"
         }
       }
     }, 
@@ -1246,8 +1258,8 @@
     }, 
     "io.kedge.ContainerSpec": {
       "required": [
-        "name", 
-        "image"
+        "image", 
+        "name"
       ], 
       "description": "A single application container that you want to run within a pod.", 
       "properties": {
@@ -1301,10 +1313,10 @@
         }, 
         "envFrom": {
           "items": {
-            "$ref": "#/definitions/io.k8s.api.core.v1.EnvFromSource"
+            "$ref": "#/definitions/io.kedge.EnvFromSource"
           }, 
           "type": "array", 
-          "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated."
+          "description": "EnvFrom defines the collection of EnvFromSource to inject into containers."
         }, 
         "stdin": {
           "type": "boolean", 
@@ -1319,7 +1331,7 @@
           "description": "Indicate how the termination message should be populated. File will use the contents of terminationMessagePath to populate the container status message on both success and failure. FallbackToLogsOnError will use the last chunk of container log output if the termination message file is empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot be updated."
         }, 
         "health": {
-          "description": "Periodic probe of container liveness and readiness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes", 
+          "description": "One common definitions for 'livenessProbe' and 'readinessProbe' this allows to have only one place to define both probes (if they are the same) Periodic probe of container liveness and readiness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes", 
           "$ref": "#/definitions/io.k8s.api.core.v1.Probe"
         }, 
         "env": {
@@ -1827,10 +1839,10 @@
     }, 
     "io.kedge.AppSpec": {
       "required": [
-        "containers", 
-        "name"
+        "name", 
+        "containers"
       ], 
-      "description": "AppSpec is a description of a app.", 
+      "description": "AppSpec is a description of an app", 
       "properties": {
         "dnsPolicy": {
           "type": "string", 
@@ -1841,7 +1853,7 @@
             "$ref": "#/definitions/io.kedge.IngressSpec"
           }, 
           "type": "array", 
-          "description": "List of Kubernetes Ingress."
+          "description": "List of Kubernetes Ingress"
         }, 
         "labels": {
           "additionalProperties": {
@@ -1945,7 +1957,7 @@
             "$ref": "#/definitions/io.kedge.ConfigMap"
           }, 
           "type": "array", 
-          "description": "List of configMaps."
+          "description": "List of configMaps"
         }, 
         "hostNetwork": {
           "type": "boolean", 
@@ -1980,7 +1992,7 @@
             "$ref": "#/definitions/io.kedge.ServiceSpec"
           }, 
           "type": "array", 
-          "description": "List of Kubernetes Services."
+          "description": "List of Kubernetes Services"
         }, 
         "progressDeadlineSeconds": {
           "type": "integer", 
@@ -3211,7 +3223,7 @@
             "type": "string"
           }, 
           "type": "object", 
-          "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'."
+          "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'"
         }, 
         "name": {
           "type": "string", 
@@ -3855,7 +3867,7 @@
         }, 
         "name": {
           "type": "string", 
-          "description": "Name of the persistent volume"
+          "description": "Name of the persistent Volume Claim"
         }, 
         "volumeName": {
           "type": "string", 
@@ -9636,6 +9648,18 @@
           }, 
           "type": "array", 
           "description": "Finalizers is an opaque list of values that must be empty to permanently remove object from storage. More info: https://git.k8s.io/community/contributors/design-proposals/namespaces.md#finalizers"
+        }
+      }
+    }, 
+    "io.kedge.EnvFromSource": {
+      "required": [
+        "configMapRef"
+      ], 
+      "description": "EnvFromSource represents the source of a set of ConfigMaps", 
+      "properties": {
+        "configMapRef": {
+          "description": "The ConfigMap to select from", 
+          "$ref": "#/definitions/io.kedge.ConfigMapEnvSource"
         }
       }
     }, 

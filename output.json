@@ -10348,10 +10348,10 @@
       }
     },
     "io.kedge.AppSpec": {
-      "description": "AppSpec is a description of a app.",
+      "description": "AppSpec is a description of an app",
       "required": [
-        "containers",
-        "name"
+        "name",
+        "containers"
       ],
       "properties": {
         "activeDeadlineSeconds": {
@@ -10368,7 +10368,7 @@
           "type": "boolean"
         },
         "configMaps": {
-          "description": "List of configMaps.",
+          "description": "List of configMaps",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.kedge.ConfigMap"
@@ -10420,7 +10420,7 @@
           "x-kubernetes-patch-strategy": "merge"
         },
         "ingresses": {
-          "description": "List of Kubernetes Ingress.",
+          "description": "List of Kubernetes Ingress",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.kedge.IngressSpec"
@@ -10526,7 +10526,7 @@
           "type": "string"
         },
         "services": {
-          "description": "List of Kubernetes Services.",
+          "description": "List of Kubernetes Services",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.kedge.ServiceSpec"
@@ -10574,7 +10574,7 @@
       ],
       "properties": {
         "data": {
-          "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'.",
+          "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'",
           "type": "object",
           "additionalProperties": {
             "type": "string"
@@ -10586,11 +10586,23 @@
         }
       }
     },
+    "io.kedge.ConfigMapEnvSource": {
+      "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with. The contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names",
+          "type": "string"
+        }
+      }
+    },
     "io.kedge.ContainerSpec": {
       "description": "A single application container that you want to run within a pod.",
       "required": [
-        "name",
-        "image"
+        "image",
+        "name"
       ],
       "properties": {
         "args": {
@@ -10617,14 +10629,14 @@
           "x-kubernetes-patch-strategy": "merge"
         },
         "envFrom": {
-          "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
+          "description": "EnvFrom defines the collection of EnvFromSource to inject into containers.",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/io.k8s.api.core.v1.EnvFromSource"
+            "$ref": "#/definitions/io.kedge.EnvFromSource"
           }
         },
         "health": {
-          "description": "Periodic probe of container liveness and readiness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes",
+          "description": "One common definitions for 'livenessProbe' and 'readinessProbe' this allows to have only one place to define both probes (if they are the same) Periodic probe of container liveness and readiness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes",
           "$ref": "#/definitions/io.k8s.api.core.v1.Probe"
         },
         "image": {
@@ -10703,6 +10715,18 @@
         }
       }
     },
+    "io.kedge.EnvFromSource": {
+      "description": "EnvFromSource represents the source of a set of ConfigMaps",
+      "required": [
+        "configMapRef"
+      ],
+      "properties": {
+        "configMapRef": {
+          "description": "The ConfigMap to select from",
+          "$ref": "#/definitions/io.kedge.ConfigMapEnvSource"
+        }
+      }
+    },
     "io.kedge.IngressSpec": {
       "description": "Create ingress object",
       "properties": {
@@ -10744,7 +10768,7 @@
           }
         },
         "name": {
-          "description": "Name of the persistent volume",
+          "description": "Name of the persistent Volume Claim",
           "type": "string"
         },
         "resources": {
@@ -10776,7 +10800,7 @@
       ],
       "properties": {
         "endpoint": {
-          "description": "Host to create ingress automatically",
+          "description": "Host to create ingress automatically. Endpoint allows specifying an ingress resource in the format '\u003cHost\u003e/\u003cPath\u003e'",
           "type": "string"
         },
         "name": {

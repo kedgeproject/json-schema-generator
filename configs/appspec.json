@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/schema#", 
   "required": [
-    "containers", 
-    "name"
+    "name", 
+    "containers"
   ], 
   "type": "object", 
-  "description": "AppSpec is a description of a app.", 
+  "description": "AppSpec is a description of an app", 
   "properties": {
     "dnsPolicy": {
       "type": "string", 
@@ -113,7 +113,7 @@
         }
       }, 
       "type": "array", 
-      "description": "List of Kubernetes Ingress."
+      "description": "List of Kubernetes Ingress"
     }, 
     "labels": {
       "additionalProperties": {
@@ -3960,7 +3960,7 @@
               "type": "string"
             }, 
             "type": "object", 
-            "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'."
+            "description": "Data contains the configuration data. Each key must consist of alphanumeric characters, '-', '_' or '.'"
           }, 
           "name": {
             "type": "string", 
@@ -3969,7 +3969,7 @@
         }
       }, 
       "type": "array", 
-      "description": "List of configMaps."
+      "description": "List of configMaps"
     }, 
     "hostNetwork": {
       "type": "boolean", 
@@ -3997,7 +3997,7 @@
           }, 
           "name": {
             "type": "string", 
-            "description": "Name of the persistent volume"
+            "description": "Name of the persistent Volume Claim"
           }, 
           "volumeName": {
             "type": "string", 
@@ -4196,7 +4196,7 @@
               "properties": {
                 "endpoint": {
                   "type": "string", 
-                  "description": "Host to create ingress automatically"
+                  "description": "Host to create ingress automatically. Endpoint allows specifying an ingress resource in the format '<Host>/<Path>'"
                 }, 
                 "targetPort": {
                   "type": "string", 
@@ -4228,7 +4228,7 @@
         }
       }, 
       "type": "array", 
-      "description": "List of Kubernetes Services."
+      "description": "List of Kubernetes Services"
     }, 
     "progressDeadlineSeconds": {
       "type": "integer", 
@@ -4256,8 +4256,8 @@
     "containers": {
       "items": {
         "required": [
-          "name", 
-          "image"
+          "image", 
+          "name"
         ], 
         "description": "A single application container that you want to run within a pod.", 
         "properties": {
@@ -4381,42 +4381,27 @@
           }, 
           "envFrom": {
             "items": {
+              "required": [
+                "configMapRef"
+              ], 
               "description": "EnvFromSource represents the source of a set of ConfigMaps", 
               "properties": {
-                "prefix": {
-                  "type": "string", 
-                  "description": "An optional identifer to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER."
-                }, 
                 "configMapRef": {
-                  "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.\n\nThe contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.", 
+                  "required": [
+                    "name"
+                  ], 
+                  "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with. The contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.", 
                   "properties": {
-                    "optional": {
-                      "type": "boolean", 
-                      "description": "Specify whether the ConfigMap must be defined"
-                    }, 
                     "name": {
                       "type": "string", 
-                      "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
-                    }
-                  }
-                }, 
-                "secretRef": {
-                  "description": "SecretEnvSource selects a Secret to populate the environment variables with.\n\nThe contents of the target Secret's Data field will represent the key-value pairs as environment variables.", 
-                  "properties": {
-                    "optional": {
-                      "type": "boolean", 
-                      "description": "Specify whether the Secret must be defined"
-                    }, 
-                    "name": {
-                      "type": "string", 
-                      "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names"
+                      "description": "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names"
                     }
                   }
                 }
               }
             }, 
             "type": "array", 
-            "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated."
+            "description": "EnvFrom defines the collection of EnvFromSource to inject into containers."
           }, 
           "workingDir": {
             "type": "string", 

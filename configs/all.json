@@ -85,6 +85,9 @@
       "$ref": "_definitions.json#/definitions/io.k8s.api.autoscaling.v2alpha1.ObjectMetricStatus"
     }, 
     {
+      "$ref": "_definitions.json#/definitions/io.kedge.ConfigMapEnvSource"
+    }, 
+    {
       "$ref": "_definitions.json#/definitions/io.k8s.api.core.v1.NodeStatus"
     }, 
     {
@@ -980,6 +983,9 @@
     }, 
     {
       "$ref": "_definitions.json#/definitions/io.k8s.api.core.v1.NamespaceSpec"
+    }, 
+    {
+      "$ref": "_definitions.json#/definitions/io.kedge.EnvFromSource"
     }, 
     {
       "$ref": "_definitions.json#/definitions/io.k8s.api.apps.v1beta1.DeploymentStatus"

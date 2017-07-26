@@ -53,6 +53,20 @@ func augmentProperties(s, t spec.Schema) spec.Schema {
 func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []Injection) spec.Definitions {
 	for _, m := range mapping {
 		defs[m.Target] = augmentProperties(k8sSpec[m.Source], defs[m.Target])
+
+		// special case, where if the key is io.kedge.AppSpec
+		// ignore the required field called template
+		if m.Target == "io.kedge.AppSpec" {
+			v := defs[m.Target]
+			var final []string
+			for _, r := range v.Required {
+				if r != "template" {
+					final = append(final, r)
+				}
+			}
+			v.Required = final
+			defs[m.Target] = v
+		}
 	}
 	return defs
 }
