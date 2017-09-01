@@ -1,6 +1,18 @@
-package: .
+package: github.com/surajssd/kedgeSchema
 import:
+- package: github.com/Sirupsen/logrus
+  version: v1.0.3
+- package: github.com/fatih/structtag
+  version: v0.1.0
+- package: github.com/go-openapi/jsonreference
 - package: github.com/go-openapi/spec
+- package: github.com/pkg/errors
+  version: v0.8.0
 - package: k8s.io/apimachinery
   subpackages:
   - pkg/openapi
+- package: k8s.io/client-go
+  version: v4.0.0
+  subpackages:
+  - pkg/api/v1
+  - pkg/apis/extensions/v1beta1

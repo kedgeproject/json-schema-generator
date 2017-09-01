@@ -89,7 +89,7 @@ type Container struct {
 	// Periodic probe of container liveness and readiness. Container will be restarted
 	// if the probe fails. Cannot be updated. More info:
 	// https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
-	// ref: io.k8s.api.core.v1.Probe
+	// ref: io.k8s.kubernetes.pkg.api.v1.Probe
 	// +optional
 	Health *api_v1.Probe `json:"health,omitempty"`
 	// EnvFrom defines the collection of EnvFromSource to inject into containers.
