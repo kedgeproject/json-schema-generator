@@ -5,7 +5,7 @@
 This will create OpenAPI configuration for [kedge](https://github.com/kedgeproject/kedge)
 
 ```bash
-$ go run main.go
+go run main.go
 ```
 
 ### Creating JSONSchema
@@ -13,19 +13,19 @@ $ go run main.go
 Install [openapi2jsonschema](https://github.com/garethr/openapi2jsonschema)
 
 ```bash
-$ pip install openapi2jsonschema
+pip install openapi2jsonschema
 ```
 
 Download the openAPI schema of Kubernetes
 
 ```bash
-$ curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.7/api/openapi-spec/swagger.json
+curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/surajssd/kedgeSchema/master/scripts/k8s-release)/api/openapi-spec/swagger.json
 ```
 
 Generate OpenAPI for kedge
 
 ```bash
-$ go run main.go parsego.go > output.json
+go run main.go parsego.go > output.json
 ```
 
 Create the json schema
@@ -40,7 +40,7 @@ $ openapi2jsonschema output.json -o configs/ --stand-alone
 Install [jsonschema tool](https://github.com/Julian/jsonschema) locally
 
 ```bash
-$ jsonschema -F "{error.message}" -i ./example/db.json ./configs/appspec.json 
+jsonschema -F "{error.message}" -i ./example/db.json ./configs/appspec.json 
 ```
 
 The file [appspec.json](./configs/appspec.json) has schema for validating kedge.
