@@ -5,34 +5,14 @@
 This will create OpenAPI configuration for [kedge](https://github.com/kedgeproject/kedge)
 
 ```bash
-go run main.go
+make install
+kedgeSchemaGen
 ```
 
 ### Creating JSONSchema
 
-Install [openapi2jsonschema](https://github.com/garethr/openapi2jsonschema)
-
 ```bash
-pip install openapi2jsonschema
-```
-
-Download the openAPI schema of Kubernetes
-
-```bash
-curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/surajssd/kedgeSchema/master/scripts/k8s-release)/api/openapi-spec/swagger.json
-```
-
-Generate OpenAPI for kedge
-
-```bash
-go run main.go parsego.go > output.json
-```
-
-Create the json schema
-
-```bash
-$ mkdir configs
-$ openapi2jsonschema output.json -o configs/ --stand-alone
+make generate-config
 ```
 
 ### Validating against schema
