@@ -11,123 +11,6 @@
   "description": "Eviction evicts a pod from its node subject to certain policies and safety constraints. This is a subresource of Pod.  A request to cause such an eviction is created by POSTing to .../pods/<pod name>/evictions.", 
   "properties": {
     "deleteOptions": {
-      "x-kubernetes-group-version-kind": [
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": ""
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1alpha1", 
-          "group": "admission.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1alpha1", 
-          "group": "admissionregistration.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "apps"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "authentication.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "authentication.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "authorization.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "authorization.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "autoscaling"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v2alpha1", 
-          "group": "autoscaling"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "batch"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v2alpha1", 
-          "group": "batch"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "certificates.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "extensions"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "federation"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1alpha1", 
-          "group": "imagepolicy.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "networking.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "policy"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1alpha1", 
-          "group": "rbac.authorization.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "rbac.authorization.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1alpha1", 
-          "group": "settings.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1", 
-          "group": "storage.k8s.io"
-        }, 
-        {
-          "kind": "DeleteOptions", 
-          "version": "v1beta1", 
-          "group": "storage.k8s.io"
-        }
-      ], 
       "description": "DeleteOptions may be provided when deleting an API object.", 
       "properties": {
         "kind": {
@@ -262,13 +145,6 @@
           "description": "Initializers tracks the progress of initialization.", 
           "properties": {
             "result": {
-              "x-kubernetes-group-version-kind": [
-                {
-                  "kind": "Status", 
-                  "version": "v1", 
-                  "group": ""
-                }
-              ], 
               "description": "Status is a return value for calls that don't return other objects.", 
               "properties": {
                 "status": {

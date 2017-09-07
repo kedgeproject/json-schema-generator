@@ -1,19 +1,12 @@
 {
-  "description": "APIGroup contains the name, the supported versions, and the preferred version of a group.", 
+  "$schema": "http://json-schema.org/schema#", 
   "required": [
     "name", 
     "versions", 
     "serverAddressByClientCIDRs"
   ], 
-  "x-kubernetes-group-version-kind": [
-    {
-      "kind": "APIGroup", 
-      "version": "v1", 
-      "group": ""
-    }
-  ], 
-  "$schema": "http://json-schema.org/schema#", 
   "type": "object", 
+  "description": "APIGroup contains the name, the supported versions, and the preferred version of a group.", 
   "properties": {
     "kind": {
       "type": "string", 

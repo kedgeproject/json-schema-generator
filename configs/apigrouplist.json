@@ -1,17 +1,10 @@
 {
-  "description": "APIGroupList is a list of APIGroup, to allow clients to discover the API at /apis.", 
+  "$schema": "http://json-schema.org/schema#", 
   "required": [
     "groups"
   ], 
-  "x-kubernetes-group-version-kind": [
-    {
-      "kind": "APIGroupList", 
-      "version": "v1", 
-      "group": ""
-    }
-  ], 
-  "$schema": "http://json-schema.org/schema#", 
   "type": "object", 
+  "description": "APIGroupList is a list of APIGroup, to allow clients to discover the API at /apis.", 
   "properties": {
     "kind": {
       "type": "string", 
@@ -27,13 +20,6 @@
           "name", 
           "versions", 
           "serverAddressByClientCIDRs"
-        ], 
-        "x-kubernetes-group-version-kind": [
-          {
-            "kind": "APIGroup", 
-            "version": "v1", 
-            "group": ""
-          }
         ], 
         "description": "APIGroup contains the name, the supported versions, and the preferred version of a group.", 
         "properties": {

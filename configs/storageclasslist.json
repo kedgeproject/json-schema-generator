@@ -6,7 +6,7 @@
   "x-kubernetes-group-version-kind": [
     {
       "kind": "StorageClassList", 
-      "version": "v1", 
+      "version": "v1beta1", 
       "group": "storage.k8s.io"
     }
   ], 
@@ -21,7 +21,7 @@
         "x-kubernetes-group-version-kind": [
           {
             "kind": "StorageClass", 
-            "version": "v1", 
+            "version": "v1beta1", 
             "group": "storage.k8s.io"
           }
         ], 
@@ -123,13 +123,6 @@
                 "description": "Initializers tracks the progress of initialization.", 
                 "properties": {
                   "result": {
-                    "x-kubernetes-group-version-kind": [
-                      {
-                        "kind": "Status", 
-                        "version": "v1", 
-                        "group": ""
-                      }
-                    ], 
                     "description": "Status is a return value for calls that don't return other objects.", 
                     "properties": {
                       "status": {

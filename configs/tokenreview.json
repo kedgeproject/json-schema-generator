@@ -6,7 +6,7 @@
   "x-kubernetes-group-version-kind": [
     {
       "kind": "TokenReview", 
-      "version": "v1beta1", 
+      "version": "v1", 
       "group": "authentication.k8s.io"
     }
   ], 
@@ -165,13 +165,6 @@
           "description": "Initializers tracks the progress of initialization.", 
           "properties": {
             "result": {
-              "x-kubernetes-group-version-kind": [
-                {
-                  "kind": "Status", 
-                  "version": "v1", 
-                  "group": ""
-                }
-              ], 
               "description": "Status is a return value for calls that don't return other objects.", 
               "properties": {
                 "status": {

@@ -174,13 +174,6 @@
                 "description": "Initializers tracks the progress of initialization.", 
                 "properties": {
                   "result": {
-                    "x-kubernetes-group-version-kind": [
-                      {
-                        "kind": "Status", 
-                        "version": "v1", 
-                        "group": ""
-                      }
-                    ], 
                     "description": "Status is a return value for calls that don't return other objects.", 
                     "properties": {
                       "status": {

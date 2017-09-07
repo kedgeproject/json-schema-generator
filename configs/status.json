@@ -1,11 +1,4 @@
 {
-  "x-kubernetes-group-version-kind": [
-    {
-      "kind": "Status", 
-      "version": "v1", 
-      "group": ""
-    }
-  ], 
   "$schema": "http://json-schema.org/schema#", 
   "type": "object", 
   "description": "Status is a return value for calls that don't return other objects.", 

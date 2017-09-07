@@ -26,13 +26,6 @@
         }
       }
     }, 
-    "group": {
-      "items": {
-        "type": "string"
-      }, 
-      "type": "array", 
-      "description": "Groups is the groups you're testing for."
-    }, 
     "resourceAttributes": {
       "description": "ResourceAttributes includes the authorization attributes available for resource requests to the Authorizer interface", 
       "properties": {
@@ -66,9 +59,16 @@
         }
       }
     }, 
+    "groups": {
+      "items": {
+        "type": "string"
+      }, 
+      "type": "array", 
+      "description": "Groups is the groups you're testing for."
+    }, 
     "user": {
       "type": "string", 
-      "description": "User is the user you're testing for. If you specify \"User\" but not \"Group\", then is it interpreted as \"What if User were not a member of any groups"
+      "description": "User is the user you're testing for. If you specify \"User\" but not \"Groups\", then is it interpreted as \"What if User were not a member of any groups"
     }
   }
 }

@@ -1,10 +1,11 @@
 {
   "$schema": "http://json-schema.org/schema#", 
   "type": "object", 
-  "description": "This NetworkPolicyIngressRule matches traffic if and only if the traffic matches both ports AND from.", 
+  "description": "NetworkPolicyIngressRule describes a particular set of traffic that is allowed to the pods matched by a NetworkPolicySpec's podSelector. The traffic must match both ports and from.", 
   "properties": {
     "from": {
       "items": {
+        "description": "NetworkPolicyPeer describes a peer to allow traffic from. Exactly one of its fields must be specified.", 
         "properties": {
           "namespaceSelector": {
             "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.", 
@@ -97,10 +98,11 @@
     }, 
     "ports": {
       "items": {
+        "description": "NetworkPolicyPort describes a port to allow traffic on", 
         "properties": {
           "protocol": {
             "type": "string", 
-            "description": "Optional.  The protocol (TCP or UDP) which traffic must match. If not specified, this field defaults to TCP."
+            "description": "The protocol (TCP or UDP) which traffic must match. If not specified, this field defaults to TCP."
           }, 
           "port": {
             "type": "string", 
