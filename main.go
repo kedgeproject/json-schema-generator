@@ -54,9 +54,9 @@ func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []
 	for _, m := range mapping {
 		defs[m.Target] = augmentProperties(k8sSpec[m.Source], defs[m.Target])
 
-		// special case, where if the key is io.kedge.AppSpec
+		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
-		if m.Target == "io.kedge.AppSpec" {
+		if m.Target == "io.kedge.DeploymentSpec" {
 			v := defs[m.Target]
 			var final []string
 			for _, r := range v.Required {

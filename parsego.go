@@ -211,20 +211,22 @@ func CreateSchema(fieldtype, desc, ref string) (spec.Schema, error) {
 			},
 		}
 	case "array":
-		refObj, err := CreateJSONRef(ref)
-		if err != nil {
-			return schema, errors.Wrapf(err, "error extracting name from json tag")
-		}
-		// an array of objects is list of objects being referred from somewhere
-		// else so using
-		schema.Items = &spec.SchemaOrArray{
-			Schema: &spec.Schema{
-				SchemaProps: spec.SchemaProps{
-					Ref: spec.Ref{
-						refObj,
+		if ref != "" {
+			refObj, err := CreateJSONRef(ref)
+			if err != nil {
+				return schema, errors.Wrapf(err, "error extracting name from json tag")
+			}
+			// an array of objects is list of objects being referred from somewhere
+			// else so using
+			schema.Items = &spec.SchemaOrArray{
+				Schema: &spec.Schema{
+					SchemaProps: spec.SchemaProps{
+						Ref: spec.Ref{
+							refObj,
+						},
 					},
 				},
-			},
+			}
 		}
 	case "starexpr":
 		refObj, err := CreateJSONRef(ref)
