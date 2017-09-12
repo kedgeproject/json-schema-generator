@@ -587,18 +587,6 @@
         }
       }
     }, 
-    "io.kedge.ConfigMapEnvSource": {
-      "required": [
-        "name"
-      ], 
-      "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with. The contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.", 
-      "properties": {
-        "name": {
-          "type": "string", 
-          "description": "Name of the referent. More info: http://kubernetes.io/docs/user-guide/identifiers#names"
-        }
-      }
-    }, 
     "io.k8s.kubernetes.pkg.api.v1.Lifecycle": {
       "description": "Lifecycle describes actions that the management system should take in response to container lifecycle events. For the PostStart and PreStop lifecycle handlers, management of the container blocks until the action is complete, unless the container process fails, in which case the handler is aborted.", 
       "properties": {
@@ -930,6 +918,45 @@
         "apiVersion": {
           "type": "string", 
           "description": "APIVersion holds the API group and version of the referenced subject. Defaults to \"v1\" for ServiceAccount subjects. Defaults to \"rbac.authorization.k8s.io/v1alpha1\" for User and Group subjects."
+        }
+      }
+    }, 
+    "io.kedge.VolumeClaim": {
+      "required": [
+        "size"
+      ], 
+      "description": "VolumeClaim is used to define Persistent Volumes for app", 
+      "properties": {
+        "storageClassName": {
+          "type": "string", 
+          "description": "Name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1"
+        }, 
+        "accessModes": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array", 
+          "description": "AccessModes contains the desired access modes the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#access-modes-1"
+        }, 
+        "name": {
+          "type": "string", 
+          "description": "Name of the persistent Volume Claim"
+        }, 
+        "volumeName": {
+          "type": "string", 
+          "description": "VolumeName is the binding reference to the PersistentVolume backing this claim."
+        }, 
+        "size": {
+          "type": "string", 
+          "description": "Size of persistent volume"
+        }, 
+        "resources": {
+          "description": "Resources represents the minimum resources the volume should have. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.ResourceRequirements"
+        }, 
+        "selector": {
+          "description": "A label query over volumes to consider for binding.", 
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
         }
       }
     }, 
@@ -1664,58 +1691,37 @@
         }
       }
     }, 
-    "io.kedge.AppSpec": {
+    "io.k8s.kubernetes.pkg.api.v1.PodList": {
       "required": [
-        "name", 
-        "containers"
+        "items"
       ], 
-      "description": "AppSpec is a description of an app", 
+      "x-kubernetes-group-version-kind": [
+        {
+          "kind": "PodList", 
+          "version": "v1", 
+          "group": ""
+        }
+      ], 
+      "description": "PodList is a list of Pods.", 
       "properties": {
-        "configMaps": {
+        "items": {
           "items": {
-            "$ref": "#/definitions/io.kedge.ConfigMap"
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Pod"
           }, 
           "type": "array", 
-          "description": "List of configMaps"
+          "description": "List of pods. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md"
         }, 
-        "ingresses": {
-          "items": {
-            "$ref": "#/definitions/io.kedge.IngressSpec"
-          }, 
-          "type": "array", 
-          "description": "List of Kubernetes Ingress"
-        }, 
-        "name": {
+        "kind": {
           "type": "string", 
-          "description": "Name of the micro-service"
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds"
         }, 
-        "services": {
-          "items": {
-            "$ref": "#/definitions/io.kedge.ServiceSpec"
-          }, 
-          "type": "array", 
-          "description": "List of Kubernetes Services"
+        "apiVersion": {
+          "type": "string", 
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
         }, 
-        "labels": {
-          "additionalProperties": {
-            "type": "string"
-          }, 
-          "type": "object", 
-          "description": "Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels"
-        }, 
-        "persistentVolumes": {
-          "items": {
-            "$ref": "#/definitions/io.kedge.PersistentVolume"
-          }, 
-          "type": "array", 
-          "description": "List of persistentVolumes that should be mounted on the pod."
-        }, 
-        "containers": {
-          "items": {
-            "$ref": "#/definitions/io.kedge.ContainerSpec"
-          }, 
-          "type": "array", 
-          "description": "List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod. Cannot be updated."
+        "metadata": {
+          "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds", 
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
     }, 
@@ -2102,11 +2108,61 @@
       "required": [
         "ports"
       ], 
-      "description": "Define Kubernetes service", 
+      "description": "ServiceSpecMod is used to define Kubernetes service", 
       "properties": {
+        "loadBalancerIP": {
+          "type": "string", 
+          "description": "Only applies to Service Type: LoadBalancer LoadBalancer will get created with the IP specified in this field. This feature depends on whether the underlying cloud-provider supports specifying the loadBalancerIP when a load balancer is created. This field will be ignored if the cloud-provider does not support the feature."
+        }, 
         "name": {
           "type": "string", 
           "description": "Name of the service"
+        }, 
+        "externalIPs": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array", 
+          "description": "externalIPs is a list of IP addresses for which nodes in the cluster will also accept traffic for this service.  These IPs are not managed by Kubernetes.  The user is responsible for ensuring that traffic arrives at a node with this IP.  A common example is external load-balancers that are not part of the Kubernetes system."
+        }, 
+        "loadBalancerSourceRanges": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array", 
+          "description": "If specified and supported by the platform, this will restrict traffic through the cloud-provider load-balancer will be restricted to the specified client IPs. This field will be ignored if the cloud-provider does not support the feature.\" More info: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/"
+        }, 
+        "healthCheckNodePort": {
+          "type": "integer", 
+          "description": "healthCheckNodePort specifies the healthcheck nodePort for the service. If not specified, HealthCheckNodePort is created by the service api backend with the allocated nodePort. Will use user-specified nodePort value if specified by the client. Only effects when Type is set to LoadBalancer and ExternalTrafficPolicy is set to Local.", 
+          "format": "int32"
+        }, 
+        "selector": {
+          "additionalProperties": {
+            "type": "string"
+          }, 
+          "type": "object", 
+          "description": "Route service traffic to pods with label keys and values matching this selector. If empty or not present, the service is assumed to have an external process managing its endpoints, which Kubernetes will not modify. Only applies to types ClusterIP, NodePort, and LoadBalancer. Ignored if type is ExternalName. More info: https://kubernetes.io/docs/concepts/services-networking/service/"
+        }, 
+        "externalName": {
+          "type": "string", 
+          "description": "externalName is the external reference that kubedns or equivalent will return as a CNAME record for this service. No proxying will be involved. Must be a valid DNS name and requires Type to be ExternalName."
+        }, 
+        "sessionAffinity": {
+          "type": "string", 
+          "description": "Supports \"ClientIP\" and \"None\". Used to maintain session affinity. Enable client IP based session affinity. Must be ClientIP or None. Defaults to None. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies"
+        }, 
+        "clusterIP": {
+          "type": "string", 
+          "description": "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. Only applies to types ClusterIP, NodePort, and LoadBalancer. Ignored if type is ExternalName. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies"
+        }, 
+        "externalTrafficPolicy": {
+          "type": "string", 
+          "description": "externalTrafficPolicy denotes if this Service desires to route external traffic to node-local or cluster-wide endpoints. \"Local\" preserves the client source IP and avoids a second hop for LoadBalancer and Nodeport type services, but risks potentially imbalanced traffic spreading. \"Cluster\" obscures the client source IP and may cause a second hop to another node, but should have good overall load-spreading."
+        }, 
+        "type": {
+          "type": "string", 
+          "description": "type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer. \"ExternalName\" maps to the specified externalName. \"ClusterIP\" allocates a cluster-internal IP address for load-balancing to endpoints. Endpoints are determined by the selector or if that is not specified, by manual construction of an Endpoints object. If clusterIP is \"None\", no virtual IP is allocated and the endpoints are published as a set of endpoints rather than a stable IP. \"NodePort\" builds on ClusterIP and allocates a port on every node which routes to the clusterIP. \"LoadBalancer\" builds on NodePort and creates an external load-balancer (if supported in the current cloud) which routes to the clusterIP. More info: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services---service-types"
         }, 
         "ports": {
           "items": {
@@ -2157,11 +2213,36 @@
       }
     }, 
     "io.kedge.ServicePort": {
-      "description": "Define service port", 
+      "required": [
+        "port"
+      ], 
+      "description": "ServicePortMod is used to define Kubernetes service's port", 
       "properties": {
         "endpoint": {
           "type": "string", 
           "description": "Host to create ingress automatically. Endpoint allows specifying an ingress resource in the format '<Host>/<Path>'"
+        }, 
+        "targetPort": {
+          "description": "Number or name of the port to access on the pods targeted by the service. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. If this is a string, it will be looked up as a named port in the target Pod's container ports. If this is not specified, the value of the 'port' field is used (an identity map). This field is ignored for services with clusterIP=None, and should be omitted or set equal to the 'port' field. More info: https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service", 
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.util.intstr.IntOrString"
+        }, 
+        "name": {
+          "type": "string", 
+          "description": "The name of this port within the service. This must be a DNS_LABEL. All ports within a ServiceSpec must have unique names. This maps to the 'Name' field in EndpointPort objects. Optional if only one ServicePort is defined on this service."
+        }, 
+        "protocol": {
+          "type": "string", 
+          "description": "The IP protocol for this port. Supports \"TCP\" and \"UDP\". Default is TCP."
+        }, 
+        "port": {
+          "type": "integer", 
+          "description": "The port that will be exposed by this service.", 
+          "format": "int32"
+        }, 
+        "nodePort": {
+          "type": "integer", 
+          "description": "The port on each node on which this service is exposed when type=NodePort or LoadBalancer. Usually assigned by the system. If specified, it will be allocated to the service if unused or else creation of the service will fail. Default is to auto-allocate a port if the ServiceType of this Service requires one. More info: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport", 
+          "format": "int32"
         }
       }
     }, 
@@ -2572,7 +2653,7 @@
       "required": [
         "data"
       ], 
-      "description": "Define ConfigMap to be created", 
+      "description": "ConfigMapMod holds configuration data for pods to consume.", 
       "properties": {
         "data": {
           "additionalProperties": {
@@ -3343,19 +3424,28 @@
         }
       }
     }, 
-    "io.kedge.PersistentVolume": {
+    "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIServiceList": {
       "required": [
-        "size"
+        "items"
       ], 
-      "description": "Define Persistent Volume to use in the app", 
+      "description": "APIServiceList is a list of APIService objects.", 
       "properties": {
-        "name": {
-          "type": "string", 
-          "description": "Name of the persistent Volume Claim"
+        "items": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService"
+          }, 
+          "type": "array"
         }, 
-        "size": {
+        "kind": {
           "type": "string", 
-          "description": "Size of persistent volume"
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds"
+        }, 
+        "apiVersion": {
+          "type": "string", 
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
+        }, 
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
     }, 
@@ -4486,40 +4576,6 @@
         }
       }
     }, 
-    "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.RoleList": {
-      "required": [
-        "items"
-      ], 
-      "x-kubernetes-group-version-kind": [
-        {
-          "kind": "RoleList", 
-          "version": "v1beta1", 
-          "group": "rbac.authorization.k8s.io"
-        }
-      ], 
-      "description": "RoleList is a collection of Roles", 
-      "properties": {
-        "items": {
-          "items": {
-            "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.rbac.v1beta1.Role"
-          }, 
-          "type": "array", 
-          "description": "Items is a list of Roles"
-        }, 
-        "kind": {
-          "type": "string", 
-          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds"
-        }, 
-        "apiVersion": {
-          "type": "string", 
-          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
-        }, 
-        "metadata": {
-          "description": "Standard object's metadata.", 
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
-        }
-      }
-    }, 
     "io.k8s.kubernetes.pkg.apis.networking.v1.NetworkPolicyList": {
       "required": [
         "items"
@@ -4602,6 +4658,230 @@
         "claimName": {
           "type": "string", 
           "description": "ClaimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims"
+        }
+      }
+    }, 
+    "io.kedge.DeploymentSpec": {
+      "required": [
+        "name", 
+        "containers"
+      ], 
+      "description": "DeploymentSpecMod is Kedge's extension of Kubernetes DeploymentSpec and allows defining a complete kedge application", 
+      "properties": {
+        "volumeClaims": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.VolumeClaim"
+          }, 
+          "type": "array", 
+          "description": "List of volume that should be mounted on the pod."
+        }, 
+        "dnsPolicy": {
+          "type": "string", 
+          "description": "Set DNS policy for containers within the pod. One of 'ClusterFirstWithHostNet', 'ClusterFirst' or 'Default'. Defaults to \"ClusterFirst\". To have DNS options set along with hostNetwork, you have to specify DNS policy explicitly to 'ClusterFirstWithHostNet'."
+        }, 
+        "ingresses": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.IngressSpec"
+          }, 
+          "type": "array", 
+          "description": "List of Kubernetes Ingress"
+        }, 
+        "labels": {
+          "additionalProperties": {
+            "type": "string"
+          }, 
+          "type": "object", 
+          "description": "Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels"
+        }, 
+        "paused": {
+          "type": "boolean", 
+          "description": "Indicates that the deployment is paused."
+        }, 
+        "restartPolicy": {
+          "type": "string", 
+          "description": "Restart policy for all containers within the pod. One of Always, OnFailure, Never. Default to Always. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy"
+        }, 
+        "nodeSelector": {
+          "additionalProperties": {
+            "type": "string"
+          }, 
+          "type": "object", 
+          "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/"
+        }, 
+        "automountServiceAccountToken": {
+          "type": "boolean", 
+          "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted."
+        }, 
+        "minReadySeconds": {
+          "type": "integer", 
+          "description": "Minimum number of seconds for which a newly created pod should be ready without any of its container crashing, for it to be considered available. Defaults to 0 (pod will be considered available as soon as it is ready)", 
+          "format": "int32"
+        }, 
+        "securityContext": {
+          "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.PodSecurityContext"
+        }, 
+        "nodeName": {
+          "type": "string", 
+          "description": "NodeName is a request to schedule this pod onto a specific node. If it is non-empty, the scheduler simply schedules this pod onto that node, assuming that it fits resource requirements."
+        }, 
+        "hostAliases": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.HostAlias"
+          }, 
+          "x-kubernetes-patch-merge-key": "ip", 
+          "type": "array", 
+          "description": "HostAliases is an optional list of hosts and IPs that will be injected into the pod's hosts file if specified. This is only valid for non-hostNetwork pods.", 
+          "x-kubernetes-patch-strategy": "merge"
+        }, 
+        "hostname": {
+          "type": "string", 
+          "description": "Specifies the hostname of the Pod If not specified, the pod's hostname will be set to a system-defined value."
+        }, 
+        "serviceAccount": {
+          "type": "string", 
+          "description": "DeprecatedServiceAccount is a depreciated alias for ServiceAccountName. Deprecated: Use serviceAccountName instead."
+        }, 
+        "strategy": {
+          "description": "The deployment strategy to use to replace existing pods with new ones.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.apps.v1beta1.DeploymentStrategy"
+        }, 
+        "affinity": {
+          "description": "If specified, the pod's scheduling constraints", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Affinity"
+        }, 
+        "template": {
+          "description": "Template describes the pods that will be created.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.PodTemplateSpec"
+        }, 
+        "tolerations": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Toleration"
+          }, 
+          "type": "array", 
+          "description": "If specified, the pod's tolerations."
+        }, 
+        "revisionHistoryLimit": {
+          "type": "integer", 
+          "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 2.", 
+          "format": "int32"
+        }, 
+        "subdomain": {
+          "type": "string", 
+          "description": "If specified, the fully qualified Pod hostname will be \"<hostname>.<subdomain>.<pod namespace>.svc.<cluster domain>\". If not specified, the pod will not have a domainname at all."
+        }, 
+        "hostPID": {
+          "type": "boolean", 
+          "description": "Use the host's pid namespace. Optional: Default to false."
+        }, 
+        "configMaps": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.ConfigMap"
+          }, 
+          "type": "array", 
+          "description": "List of configMaps"
+        }, 
+        "hostNetwork": {
+          "type": "boolean", 
+          "description": "Host networking requested for this pod. Use the host's network namespace. If this option is set, the ports that will be used must be specified. Default to false."
+        }, 
+        "serviceAccountName": {
+          "type": "string", 
+          "description": "ServiceAccountName is the name of the ServiceAccount to use to run this pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/"
+        }, 
+        "replicas": {
+          "type": "integer", 
+          "description": "Number of desired pods. This is a pointer to distinguish between explicit zero and not specified. Defaults to 1.", 
+          "format": "int32"
+        }, 
+        "selector": {
+          "description": "Label selector for pods. Existing ReplicaSets whose pods are selected by this will be the ones affected by this deployment.", 
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
+        }, 
+        "controller": {
+          "type": "string", 
+          "description": "Specify which Kubernetes controller to generate. Defaults to deployment."
+        }, 
+        "hostIPC": {
+          "type": "boolean", 
+          "description": "Use the host's ipc namespace. Optional: Default to false."
+        }, 
+        "services": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.ServiceSpec"
+          }, 
+          "type": "array", 
+          "description": "List of Kubernetes Services"
+        }, 
+        "progressDeadlineSeconds": {
+          "type": "integer", 
+          "description": "The maximum time in seconds for a deployment to make progress before it is considered to be failed. The deployment controller will continue to process failed deployments and a condition with a ProgressDeadlineExceeded reason will be surfaced in the deployment status. Once autoRollback is implemented, the deployment controller will automatically rollback failed deployments. Note that progress will not be estimated during the time a deployment is paused. Defaults to 600s.", 
+          "format": "int32"
+        }, 
+        "name": {
+          "type": "string", 
+          "description": "Name of the micro-service"
+        }, 
+        "schedulerName": {
+          "type": "string", 
+          "description": "If specified, the pod will be dispatched by specified scheduler. If not specified, the pod will be dispatched by default scheduler."
+        }, 
+        "secrets": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.SecretSpec"
+          }, 
+          "type": "array", 
+          "description": "List of Kubernetes Secrets"
+        }, 
+        "containers": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.ContainerSpec"
+          }, 
+          "type": "array", 
+          "description": "List of containers belonging to the pod. Containers cannot currently be added or removed. There must be at least one container in a Pod. Cannot be updated."
+        }, 
+        "activeDeadlineSeconds": {
+          "type": "integer", 
+          "description": "Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer.", 
+          "format": "int64"
+        }, 
+        "terminationGracePeriodSeconds": {
+          "type": "integer", 
+          "description": "Optional duration in seconds the pod needs to terminate gracefully. May be decreased in delete request. Value must be non-negative integer. The value zero indicates delete immediately. If this value is nil, the default grace period will be used instead. The grace period is the duration in seconds after the processes running in the pod are sent a termination signal and the time when the processes are forcibly halted with a kill signal. Set this value longer than the expected cleanup time for your process. Defaults to 30 seconds.", 
+          "format": "int64"
+        }, 
+        "extraResources": {
+          "type": "array", 
+          "description": "List of Kubernetes resource files, that can be directly given to Kubernetes"
+        }, 
+        "rollbackTo": {
+          "description": "The config this deployment is rolling back to. Will be cleared after rollback is done.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.apps.v1beta1.RollbackConfig"
+        }, 
+        "volumes": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Volume"
+          }, 
+          "x-kubernetes-patch-merge-key": "name", 
+          "type": "array", 
+          "description": "List of volumes that can be mounted by containers belonging to the pod. More info: https://kubernetes.io/docs/concepts/storage/volumes", 
+          "x-kubernetes-patch-strategy": "merge"
+        }, 
+        "initContainers": {
+          "items": {
+            "$ref": "#/definitions/io.kedge.ContainerSpec"
+          }, 
+          "type": "array", 
+          "description": "List of initialization containers belonging to the pod. Init containers are executed in order prior to containers being started. If any init container fails, the pod is considered to have failed and is handled according to its restartPolicy. The name for an init container or normal container must be unique among all containers."
+        }, 
+        "imagePullSecrets": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.LocalObjectReference"
+          }, 
+          "x-kubernetes-patch-merge-key": "name", 
+          "type": "array", 
+          "description": "ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for them to use. For example, in the case of docker, only DockerConfig type secrets are honored. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod", 
+          "x-kubernetes-patch-strategy": "merge"
         }
       }
     }, 
@@ -6636,31 +6916,6 @@
         }
       }
     }, 
-    "io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIServiceList": {
-      "required": [
-        "items"
-      ], 
-      "description": "APIServiceList is a list of APIService objects.", 
-      "properties": {
-        "items": {
-          "items": {
-            "$ref": "#/definitions/io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService"
-          }, 
-          "type": "array"
-        }, 
-        "kind": {
-          "type": "string", 
-          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds"
-        }, 
-        "apiVersion": {
-          "type": "string", 
-          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
-        }, 
-        "metadata": {
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
-        }
-      }
-    }, 
     "io.k8s.apimachinery.pkg.version.Info": {
       "required": [
         "major", 
@@ -8485,18 +8740,119 @@
       }
     }, 
     "io.kedge.ContainerSpec": {
-      "description": "A single application container that you want to run within a pod.", 
+      "required": [
+        "name", 
+        "image"
+      ], 
+      "description": "Container defines a single application container that you want to run within a pod.", 
       "properties": {
+        "livenessProbe": {
+          "description": "Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Probe"
+        }, 
+        "terminationMessagePath": {
+          "type": "string", 
+          "description": "Optional: Path at which the file to which the container's termination message will be written is mounted into the container's filesystem. Message written is intended to be brief final status, such as an assertion failure message. Will be truncated by the node if greater than 4096 bytes. The total message length across all containers will be limited to 12kb. Defaults to /dev/termination-log. Cannot be updated."
+        }, 
+        "workingDir": {
+          "type": "string", 
+          "description": "Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated."
+        }, 
+        "image": {
+          "type": "string", 
+          "description": "Docker image name. More info: https://kubernetes.io/docs/concepts/containers/images"
+        }, 
+        "args": {
+          "items": {
+            "type": "string"
+          }, 
+          "type": "array", 
+          "description": "Arguments to the entrypoint. The docker image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
+        }, 
+        "volumeMounts": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.VolumeMount"
+          }, 
+          "x-kubernetes-patch-merge-key": "mountPath", 
+          "type": "array", 
+          "description": "Pod volumes to mount into the container's filesystem. Cannot be updated.", 
+          "x-kubernetes-patch-strategy": "merge"
+        }, 
+        "tty": {
+          "type": "boolean", 
+          "description": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is false."
+        }, 
+        "lifecycle": {
+          "description": "Actions that the management system should take in response to container lifecycle events. Cannot be updated.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Lifecycle"
+        }, 
+        "securityContext": {
+          "description": "Security options the pod should run with. More info: https://kubernetes.io/docs/concepts/policy/security-context/ More info: https://git.k8s.io/community/contributors/design-proposals/security_context.md", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.SecurityContext"
+        }, 
+        "name": {
+          "type": "string", 
+          "description": "Name of the container specified as a DNS_LABEL. Each container in a pod must have a unique name (DNS_LABEL). Cannot be updated."
+        }, 
+        "envFrom": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.EnvFromSource"
+          }, 
+          "type": "array", 
+          "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated."
+        }, 
+        "stdin": {
+          "type": "boolean", 
+          "description": "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF. Default is false."
+        }, 
+        "stdinOnce": {
+          "type": "boolean", 
+          "description": "Whether the container runtime should close the stdin channel after it has been opened by a single attach. When stdin is true the stdin stream will remain open across multiple attach sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the first client attaches to stdin, and then remains open and accepts data until the client disconnects, at which time stdin is closed and remains closed until the container is restarted. If this flag is false, a container processes that reads from stdin will never receive an EOF. Default is false"
+        }, 
+        "terminationMessagePolicy": {
+          "type": "string", 
+          "description": "Indicate how the termination message should be populated. File will use the contents of terminationMessagePath to populate the container status message on both success and failure. FallbackToLogsOnError will use the last chunk of container log output if the termination message file is empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot be updated."
+        }, 
         "health": {
           "description": "One common definitions for 'livenessProbe' and 'readinessProbe' this allows to have only one place to define both probes (if they are the same) Periodic probe of container liveness and readiness. Container will be restarted if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes", 
           "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Probe"
         }, 
-        "envFrom": {
+        "env": {
           "items": {
-            "$ref": "#/definitions/io.kedge.EnvFromSource"
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.EnvVar"
+          }, 
+          "x-kubernetes-patch-merge-key": "name", 
+          "type": "array", 
+          "description": "List of environment variables to set in the container. Cannot be updated.", 
+          "x-kubernetes-patch-strategy": "merge"
+        }, 
+        "imagePullPolicy": {
+          "type": "string", 
+          "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images"
+        }, 
+        "readinessProbe": {
+          "description": "Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Probe"
+        }, 
+        "command": {
+          "items": {
+            "type": "string"
           }, 
           "type": "array", 
-          "description": "EnvFrom defines the collection of EnvFromSource to inject into containers."
+          "description": "Entrypoint array. Not executed within a shell. The docker image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell"
+        }, 
+        "ports": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.ContainerPort"
+          }, 
+          "x-kubernetes-patch-merge-key": "containerPort", 
+          "type": "array", 
+          "description": "List of ports to expose from the container. Exposing a port here gives the system additional information about the network connections a container uses, but is primarily informational. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default \"0.0.0.0\" address inside a container will be accessible from the network. Cannot be updated.", 
+          "x-kubernetes-patch-strategy": "merge"
+        }, 
+        "resources": {
+          "description": "Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#resources", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.ResourceRequirements"
         }
       }
     }, 
@@ -9269,18 +9625,6 @@
         }
       }
     }, 
-    "io.kedge.EnvFromSource": {
-      "required": [
-        "configMapRef"
-      ], 
-      "description": "EnvFromSource represents the source of a set of ConfigMaps", 
-      "properties": {
-        "configMapRef": {
-          "description": "The ConfigMap to select from", 
-          "$ref": "#/definitions/io.kedge.ConfigMapEnvSource"
-        }
-      }
-    }, 
     "io.k8s.kubernetes.pkg.api.v1.ResourceQuota": {
       "x-kubernetes-group-version-kind": [
         {
@@ -9344,6 +9688,46 @@
         "metadata": {
           "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata", 
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
+        }
+      }
+    }, 
+    "io.kedge.SecretSpec": {
+      "description": "SecretMod defines secret that will be consumed by application", 
+      "properties": {
+        "kind": {
+          "type": "string", 
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds"
+        }, 
+        "name": {
+          "type": "string", 
+          "description": "Name of the secret"
+        }, 
+        "stringData": {
+          "additionalProperties": {
+            "type": "string"
+          }, 
+          "type": "object", 
+          "description": "stringData allows specifying non-binary secret data in string form. It is provided as a write-only convenience method. All keys and values are merged into the data field on write, overwriting any existing values. It is never output when reading from the API."
+        }, 
+        "metadata": {
+          "description": "Standard object's metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata", 
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        }, 
+        "type": {
+          "type": "string", 
+          "description": "Used to facilitate programmatic handling of secret data."
+        }, 
+        "apiVersion": {
+          "type": "string", 
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
+        }, 
+        "data": {
+          "additionalProperties": {
+            "type": "string", 
+            "format": "byte"
+          }, 
+          "type": "object", 
+          "description": "Data contains the secret data. Each key must consist of alphanumeric characters, '-', '_' or '.'. The serialized form of the secret data is a base64 encoded string, representing the arbitrary (possibly non-string) data value here. Described in https://tools.ietf.org/html/rfc4648#section-4"
         }
       }
     }, 
@@ -9441,25 +9825,25 @@
         }
       }
     }, 
-    "io.k8s.kubernetes.pkg.api.v1.PodList": {
+    "io.k8s.kubernetes.pkg.apis.rbac.v1beta1.RoleList": {
       "required": [
         "items"
       ], 
       "x-kubernetes-group-version-kind": [
         {
-          "kind": "PodList", 
-          "version": "v1", 
-          "group": ""
+          "kind": "RoleList", 
+          "version": "v1beta1", 
+          "group": "rbac.authorization.k8s.io"
         }
       ], 
-      "description": "PodList is a list of Pods.", 
+      "description": "RoleList is a collection of Roles", 
       "properties": {
         "items": {
           "items": {
-            "$ref": "#/definitions/io.k8s.kubernetes.pkg.api.v1.Pod"
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.rbac.v1beta1.Role"
           }, 
           "type": "array", 
-          "description": "List of pods. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md"
+          "description": "Items is a list of Roles"
         }, 
         "kind": {
           "type": "string", 
@@ -9470,7 +9854,7 @@
           "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources"
         }, 
         "metadata": {
-          "description": "Standard list metadata. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds", 
+          "description": "Standard object's metadata.", 
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
         }
       }
@@ -9707,11 +10091,29 @@
       }
     }, 
     "io.kedge.IngressSpec": {
-      "description": "Create ingress object", 
+      "description": "IngressSpecMod defines Kubernetes Ingress object", 
       "properties": {
+        "rules": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.extensions.v1beta1.IngressRule"
+          }, 
+          "type": "array", 
+          "description": "A list of host rules used to configure the Ingress. If unspecified, or no rule matches, all traffic is sent to the default backend."
+        }, 
+        "tls": {
+          "items": {
+            "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.extensions.v1beta1.IngressTLS"
+          }, 
+          "type": "array", 
+          "description": "TLS configuration. Currently the Ingress only supports a single TLS port, 443. If multiple members of this list specify different hosts, they will be multiplexed on the same port according to the hostname specified through the SNI TLS extension, if the ingress controller fulfilling the ingress supports SNI."
+        }, 
         "name": {
           "type": "string", 
           "description": "Name of the ingress"
+        }, 
+        "backend": {
+          "description": "A default backend capable of servicing requests that don't match any rule. At least one of 'backend' or 'rules' must be specified. This field is optional to allow the loadbalancer controller or defaulting logic to specify a global default.", 
+          "$ref": "#/definitions/io.k8s.kubernetes.pkg.apis.extensions.v1beta1.IngressBackend"
         }
       }
     }, 
