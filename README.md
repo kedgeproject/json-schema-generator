@@ -3,8 +3,9 @@
 ## Creating OpenAPI
 
 This will create OpenAPI configuration for [kedge](https://github.com/kedgeproject/kedge),
-but make sure you have Kubernetes Swagger OpenAPI schema and Kedge `spec.go` downloaded
-locally. For detailed steps see [manual steps](https://github.com/surajssd/kedge-schema#doing-it-the-hard-way).
+but make sure you have Kubernetes Swagger OpenAPI schema [`swagger.json`](https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json)
+and Kedge [`spec.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/spec.go)
+downloaded locally. For detailed steps see [manual steps](https://github.com/surajssd/kedge-schema#doing-it-the-hard-way).
 
 ```bash
 make install
@@ -68,7 +69,7 @@ openapi2jsonschema output.json -o configs/ --stand-alone
 Now all the JSONSchemas are generated in `configs` directory. The one that is most important
 to us is `deploymentspecmod.json`.
 
-**Protip**: To avoid all these manual steps do it the easy way.
+**Protip**: To avoid all these manual steps do it the [easy way](https://github.com/surajssd/kedge-schema#doing-it-the-easy-way).
 
 ## Validating against schema
 
