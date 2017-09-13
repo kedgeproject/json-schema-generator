@@ -5,6 +5,11 @@
 # Ignore compiled files
 kedgeSchemaGen
 
+# Output of tools
+swagger.json
+output.json
+spec.go
+
 #
 # GO SPECIFIC
 #

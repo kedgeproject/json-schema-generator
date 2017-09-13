@@ -10,4 +10,3 @@ kedgeSchemaGen > output.json
 mkdir -p configs
 openapi2jsonschema output.json -o configs/ --stand-alone
 
-rm -rf swagger.json output.json spec.go
