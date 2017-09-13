@@ -6,7 +6,7 @@ This will create OpenAPI configuration for [kedge](https://github.com/kedgeproje
 
 ```bash
 make install
-kedgeSchemaGen
+kedge-schema
 ```
 
 ### Creating JSONSchema
