@@ -56,7 +56,7 @@ func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []
 
 		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
-		if m.Target == "io.kedge.DeploymentSpec" {
+		if m.Target == "io.kedge.DeploymentSpecMod" {
 			v := defs[m.Target]
 			var final []string
 			for _, r := range v.Required {

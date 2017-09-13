@@ -424,6 +424,9 @@
       "$ref": "_definitions.json#/definitions/io.k8s.kubernetes.pkg.apis.policy.v1beta1.PodDisruptionBudgetStatus"
     }, 
     {
+      "$ref": "_definitions.json#/definitions/io.kedge.DeploymentSpecMod"
+    }, 
+    {
       "$ref": "_definitions.json#/definitions/io.k8s.kubernetes.pkg.api.v1.LocalVolumeSource"
     }, 
     {
@@ -515,9 +518,6 @@
     }, 
     {
       "$ref": "_definitions.json#/definitions/io.k8s.kubernetes.pkg.api.v1.PersistentVolumeClaimVolumeSource"
-    }, 
-    {
-      "$ref": "_definitions.json#/definitions/io.kedge.DeploymentSpec"
     }, 
     {
       "$ref": "_definitions.json#/definitions/io.k8s.kubernetes.pkg.apis.extensions.v1beta1.NetworkPolicyList"
