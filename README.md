@@ -20,8 +20,12 @@ make generate-config
 Install [jsonschema tool](https://github.com/Julian/jsonschema) locally
 
 ```bash
-jsonschema -F "{error.message}" -i ./example/db.json ./configs/appspec.json 
+jsonschema -F "{error.message}" -i ./example/db.json ./configs/deploymentspecmod.json
 ```
+Since the input file [db.json](./example/db.json) has deployment so we are using this
+[deploymentspecmod.json](./configs/deploymentspecmod.json) to validate. If the controller
+is different we will have to use a different file.
 
-The file [appspec.json](./configs/appspec.json) has schema for validating kedge.
+
+The file [deploymentspecmod.json](./configs/deploymentspecmod.json) has schema for validating kedge.
 The above file [db.json](./example/db.json) is taken from [kedge repo example](https://github.com/kedgeproject/kedge/blob/master/examples/envFrom/db.yaml).
