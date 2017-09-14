@@ -1,4 +1,4 @@
-package: github.com/surajssd/kedgeSchema
+package: github.com/kedgeproject/kedge-jsonschema
 import:
 - package: github.com/Sirupsen/logrus
   version: v1.0.3
