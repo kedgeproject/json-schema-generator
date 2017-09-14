@@ -3,7 +3,7 @@
 #
 
 # Ignore compiled files
-kedge-schema
+kedge-jsonschema
 
 # Output of tools
 swagger.json

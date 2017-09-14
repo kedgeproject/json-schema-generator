@@ -5,11 +5,11 @@ all: bin
 
 .PHONY: bin
 bin:
-	go build -o kedge-schema main.go parsego.go
+	go build -o kedge-jsonschema main.go parsego.go
 
 .PHONY: install
 install: bin
-	cp kedge-schema $(GOBIN)/
+	cp kedge-jsonschema $(GOBIN)/
 
 .PHONY: container-image
 container-image: bin
