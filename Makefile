@@ -16,5 +16,5 @@ container-image:
 	docker build -t surajd/kedgeschema -f ./scripts/Dockerfile .
 
 .PHONY: generate-config
-generate-config: container-image
+generate-config:
 	docker run -v `pwd`:/data:Z surajd/kedgeschema
