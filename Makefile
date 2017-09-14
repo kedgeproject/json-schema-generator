@@ -12,7 +12,7 @@ install: bin
 	cp kedge-jsonschema $(GOBIN)/
 
 .PHONY: container-image
-container-image: bin
+container-image:
 	docker build -t surajd/kedgeschema -f ./scripts/Dockerfile .
 
 .PHONY: generate-config
