@@ -2106,10 +2106,15 @@
     }, 
     "io.kedge.ServiceSpec": {
       "required": [
-        "ports"
+        "ports", 
+        "portMappings"
       ], 
       "description": "ServiceSpecMod is used to define Kubernetes service", 
       "properties": {
+        "externalName": {
+          "type": "string", 
+          "description": "externalName is the external reference that kubedns or equivalent will return as a CNAME record for this service. No proxying will be involved. Must be a valid DNS name and requires Type to be ExternalName."
+        }, 
         "loadBalancerIP": {
           "type": "string", 
           "description": "Only applies to Service Type: LoadBalancer LoadBalancer will get created with the IP specified in this field. This feature depends on whether the underlying cloud-provider supports specifying the loadBalancerIP when a load balancer is created. This field will be ignored if the cloud-provider does not support the feature."
@@ -2144,9 +2149,9 @@
           "type": "object", 
           "description": "Route service traffic to pods with label keys and values matching this selector. If empty or not present, the service is assumed to have an external process managing its endpoints, which Kubernetes will not modify. Only applies to types ClusterIP, NodePort, and LoadBalancer. Ignored if type is ExternalName. More info: https://kubernetes.io/docs/concepts/services-networking/service/"
         }, 
-        "externalName": {
-          "type": "string", 
-          "description": "externalName is the external reference that kubedns or equivalent will return as a CNAME record for this service. No proxying will be involved. Must be a valid DNS name and requires Type to be ExternalName."
+        "portMappings": {
+          "type": "array", 
+          "description": "The list of portMappings, where each portMapping allows specifying port, targetPort and protocol in the format '<port>:<targetPort>/<protocol>'"
         }, 
         "sessionAffinity": {
           "type": "string", 
@@ -3791,8 +3796,8 @@
     }, 
     "io.kedge.DeploymentSpecMod": {
       "required": [
-        "name", 
-        "containers"
+        "containers", 
+        "name"
       ], 
       "description": "DeploymentSpecMod is Kedge's extension of Kubernetes DeploymentSpec and allows defining a complete kedge application", 
       "properties": {
