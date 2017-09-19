@@ -83,6 +83,6 @@ Since the input file [`db.json`](./example/db.json) has deployment so we are usi
 is different we will have to use a different file.
 
 
-The file [`deploymentspecmod.json`](./schema/deploymentspecmod.json) has schema for
-validating kedge.
+The file [`deploymentspecmod.json`](https://github.com/kedgeproject/json-schema/blob/master/schema/deploymentspecmod.json)
+has schema for validating kedge.
 The above file [`db.json`](./example/db.json) is taken from [kedge repo example](https://github.com/kedgeproject/kedge/blob/master/examples/envFrom/db.yaml).
