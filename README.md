@@ -5,7 +5,7 @@
 This will create OpenAPI configuration for [kedge](https://github.com/kedgeproject/kedge),
 but make sure you have Kubernetes Swagger OpenAPI schema [`swagger.json`](https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json)
 and Kedge [`spec.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/spec.go)
-downloaded locally. For detailed steps see [manual steps](https://github.com/kedgeproject/kedge-jsonschema#doing-it-the-hard-way).
+downloaded locally. For detailed steps see [manual steps](https://github.com/kedgeproject/json-schema-generator#doing-it-the-hard-way).
 
 ```bash
 make install
@@ -32,8 +32,8 @@ things manually for various tools.
 Let's download the Kubernetes OpenAPI schema
 
 ```bash
-cd $GOPATH/src/github.com/kedgeproject/kedge-jsonschema
-curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/kedge-jsonschema/master/scripts/k8s-release)/api/openapi-spec/swagger.json
+cd $GOPATH/src/github.com/kedgeproject/json-schema-generator
+curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/json-schema-generator/master/scripts/k8s-release)/api/openapi-spec/swagger.json
 ```
 
 Also we need to download the Kedge [`spec.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/spec.go)
@@ -69,7 +69,7 @@ openapi2jsonschema output.json -o schema/ --stand-alone
 Now all the JSONSchemas are generated in `schema` directory. The one that is most important
 to us is `deploymentspecmod.json`.
 
-**Protip**: To avoid all these manual steps do it the [easy way](https://github.com/kedgeproject/kedge-jsonschema#doing-it-the-easy-way).
+**Protip**: To avoid all these manual steps do it the [easy way](https://github.com/kedgeproject/json-schema-generator#doing-it-the-easy-way).
 
 ## Validating against schema
 
