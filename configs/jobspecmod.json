@@ -2,10 +2,11 @@
   "$schema": "http://json-schema.org/schema#", 
   "required": [
     "name", 
-    "containers"
+    "containers", 
+    "template"
   ], 
   "type": "object", 
-  "description": "DeploymentSpecMod is Kedge's extension of Kubernetes DeploymentSpec and allows defining a complete kedge application", 
+  "description": "JobSpecMod is Kedge's extension of Kubernetes JobSpec and allows defining a complete kedge application", 
   "properties": {
     "volumeClaims": {
       "items": {
@@ -211,6 +212,11 @@
       "type": "array", 
       "description": "List of Kubernetes Ingress"
     }, 
+    "completions": {
+      "type": "integer", 
+      "description": "Specifies the desired number of successfully finished pods the job should be run with.  Setting to nil means that the success of any pod signals the success of all pods, and allows parallelism to have any positive value.  Setting to 1 means that parallelism is limited to 1 and the success of that pod signals the success of the job. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/", 
+      "format": "int32"
+    }, 
     "labels": {
       "additionalProperties": {
         "type": "string"
@@ -218,29 +224,13 @@
       "type": "object", 
       "description": "Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels"
     }, 
-    "paused": {
-      "type": "boolean", 
-      "description": "Indicates that the deployment is paused."
-    }, 
     "restartPolicy": {
       "type": "string", 
       "description": "Restart policy for all containers within the pod. One of Always, OnFailure, Never. Default to Always. More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy"
     }, 
-    "nodeSelector": {
-      "additionalProperties": {
-        "type": "string"
-      }, 
-      "type": "object", 
-      "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/"
-    }, 
     "automountServiceAccountToken": {
       "type": "boolean", 
       "description": "AutomountServiceAccountToken indicates whether a service account token should be automatically mounted."
-    }, 
-    "minReadySeconds": {
-      "type": "integer", 
-      "description": "Minimum number of seconds for which a newly created pod should be ready without any of its container crashing, for it to be considered available. Defaults to 0 (pod will be considered available as soon as it is ready)", 
-      "format": "int32"
     }, 
     "securityContext": {
       "description": "PodSecurityContext holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext.  Field values of container.securityContext take precedence over field values of PodSecurityContext.", 
@@ -324,27 +314,12 @@
       "type": "string", 
       "description": "DeprecatedServiceAccount is a depreciated alias for ServiceAccountName. Deprecated: Use serviceAccountName instead."
     }, 
-    "strategy": {
-      "description": "DeploymentStrategy describes how to replace existing pods with new ones.", 
-      "properties": {
-        "rollingUpdate": {
-          "description": "Spec to control the desired behavior of rolling update.", 
-          "properties": {
-            "maxSurge": {
-              "type": "string", 
-              "format": "int-or-string"
-            }, 
-            "maxUnavailable": {
-              "type": "string", 
-              "format": "int-or-string"
-            }
-          }
-        }, 
-        "type": {
-          "type": "string", 
-          "description": "Type of deployment. Can be \"Recreate\" or \"RollingUpdate\". Default is RollingUpdate."
-        }
-      }
+    "nodeSelector": {
+      "additionalProperties": {
+        "type": "string"
+      }, 
+      "type": "object", 
+      "description": "NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node's labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/"
     }, 
     "affinity": {
       "description": "Affinity is a group of affinity scheduling rules.", 
@@ -4006,11 +3981,6 @@
       "type": "array", 
       "description": "If specified, the pod's tolerations."
     }, 
-    "revisionHistoryLimit": {
-      "type": "integer", 
-      "description": "The number of old ReplicaSets to retain to allow rollback. This is a pointer to distinguish between explicit zero and not specified. Defaults to 2.", 
-      "format": "int32"
-    }, 
     "subdomain": {
       "type": "string", 
       "description": "If specified, the fully qualified Pod hostname will be \"<hostname>.<subdomain>.<pod namespace>.svc.<cluster domain>\". If not specified, the pod will not have a domainname at all."
@@ -4050,10 +4020,9 @@
       "type": "string", 
       "description": "ServiceAccountName is the name of the ServiceAccount to use to run this pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/"
     }, 
-    "replicas": {
-      "type": "integer", 
-      "description": "Number of desired pods. This is a pointer to distinguish between explicit zero and not specified. Defaults to 1.", 
-      "format": "int32"
+    "manualSelector": {
+      "type": "boolean", 
+      "description": "manualSelector controls generation of pod labels and pod selectors. Leave `manualSelector` unset unless you are certain what you are doing. When false or unset, the system pick labels unique to this job and appends those labels to the pod template.  When true, the user is responsible for picking unique labels and specifying the selector.  Failure to pick a unique label may cause this and other jobs to not function correctly.  However, You may see `manualSelector=true` in jobs that were created with the old `extensions/v1beta1` API. More info: https://git.k8s.io/community/contributors/design-proposals/selector-generation.md"
     }, 
     "selector": {
       "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all objects. A null label selector matches no objects.", 
@@ -4213,11 +4182,6 @@
       }, 
       "type": "array", 
       "description": "List of Kubernetes Services"
-    }, 
-    "progressDeadlineSeconds": {
-      "type": "integer", 
-      "description": "The maximum time in seconds for a deployment to make progress before it is considered to be failed. The deployment controller will continue to process failed deployments and a condition with a ProgressDeadlineExceeded reason will be surfaced in the deployment status. Once autoRollback is implemented, the deployment controller will automatically rollback failed deployments. Note that progress will not be estimated during the time a deployment is paused. Defaults to 600s.", 
-      "format": "int32"
     }, 
     "name": {
       "type": "string", 
@@ -5319,7 +5283,7 @@
     }, 
     "activeDeadlineSeconds": {
       "type": "integer", 
-      "description": "Optional duration in seconds the pod may be active on the node relative to StartTime before the system will actively try to mark it failed and kill associated containers. Value must be a positive integer.", 
+      "description": "Optional duration in seconds relative to the startTime that the job may be active before the system tries to terminate it; value must be positive integer This only sets ActiveDeadlineSeconds in JobSpec, not PodSpec", 
       "format": "int64"
     }, 
     "terminationGracePeriodSeconds": {
@@ -5331,14 +5295,10 @@
       "type": "array", 
       "description": "List of Kubernetes resource files, that can be directly given to Kubernetes"
     }, 
-    "rollbackTo": {
-      "properties": {
-        "revision": {
-          "type": "integer", 
-          "description": "The revision to rollback to. If set to 0, rollback to the last revision.", 
-          "format": "int64"
-        }
-      }
+    "parallelism": {
+      "type": "integer", 
+      "description": "Specifies the maximum desired number of pods the job should run at any given time. The actual number of pods running in steady state will be less than this number when ((.spec.completions - .status.successful) < .spec.parallelism), i.e. when the work left to do is less than max parallelism. More info: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/", 
+      "format": "int32"
     }, 
     "volumes": {
       "items": {
