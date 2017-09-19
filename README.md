@@ -62,11 +62,11 @@ for Kedge.
 Once installed run `openapi2jsonschema`
 
 ```bash
-mkdir -p configs
-openapi2jsonschema output.json -o configs/ --stand-alone
+mkdir -p schema
+openapi2jsonschema output.json -o schema/ --stand-alone
 ```
 
-Now all the JSONSchemas are generated in `configs` directory. The one that is most important
+Now all the JSONSchemas are generated in `schema` directory. The one that is most important
 to us is `deploymentspecmod.json`.
 
 **Protip**: To avoid all these manual steps do it the [easy way](https://github.com/kedgeproject/kedge-jsonschema#doing-it-the-easy-way).
@@ -76,13 +76,13 @@ to us is `deploymentspecmod.json`.
 Install [jsonschema tool](https://github.com/Julian/jsonschema) locally
 
 ```bash
-jsonschema -F "{error.message}" -i ./example/db.json ./configs/deploymentspecmod.json
+jsonschema -F "{error.message}" -i ./example/db.json ./schema/deploymentspecmod.json
 ```
 Since the input file [`db.json`](./example/db.json) has deployment so we are using this
-[`deploymentspecmod.json`](./configs/deploymentspecmod.json) to validate. If the controller
+[`deploymentspecmod.json`](./schema/deploymentspecmod.json) to validate. If the controller
 is different we will have to use a different file.
 
 
-The file [`deploymentspecmod.json`](./configs/deploymentspecmod.json) has schema for
+The file [`deploymentspecmod.json`](./schema/deploymentspecmod.json) has schema for
 validating kedge.
 The above file [`db.json`](./example/db.json) is taken from [kedge repo example](https://github.com/kedgeproject/kedge/blob/master/examples/envFrom/db.yaml).
