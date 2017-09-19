@@ -101,7 +101,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 		}
 
 		// Find what is the type of struct field
-		fieldtype, err := GetStructFieldType(sf.Type)
+		fieldtype, format, err := GetStructFieldType(sf.Type)
 		if err != nil {
 			return mapping, errors.Wrapf(err, "could not find the struct field type: %v", sf.Names)
 		}
@@ -145,7 +145,7 @@ func ParseStruct(strct *ast.StructType, spc *ast.GenDecl, defs spec.Definitions,
 
 		// for other types we just create schema and depending on the type
 		// this will add necessary things
-		schema, err := CreateSchema(fieldtype, desc, ref)
+		schema, err := CreateSchema(fieldtype, format, desc, ref)
 		if err != nil {
 			return mapping, errors.Wrapf(err, "error creating schema: %v", sf.Names)
 		}
@@ -194,7 +194,7 @@ func TypeSpecToStruct(t interface{}) (*ast.StructType, bool) {
 
 // Schema the schema object allows the definition of input and output data types.
 // This will be added to definitions we have
-func CreateSchema(fieldtype, desc, ref string) (spec.Schema, error) {
+func CreateSchema(fieldtype, format, desc, ref string) (spec.Schema, error) {
 	schema := spec.Schema{
 		SchemaProps: spec.SchemaProps{
 			Description: desc,
@@ -202,6 +202,8 @@ func CreateSchema(fieldtype, desc, ref string) (spec.Schema, error) {
 		},
 	}
 	switch fieldtype {
+	case "integer":
+		schema.Format = format
 	case "object":
 		schema.AdditionalProperties = &spec.SchemaOrBool{
 			Schema: &spec.Schema{
@@ -229,15 +231,17 @@ func CreateSchema(fieldtype, desc, ref string) (spec.Schema, error) {
 			}
 		}
 	case "starexpr":
-		refObj, err := CreateJSONRef(ref)
-		if err != nil {
-			return schema, errors.Wrapf(err, "error extracting name from json tag")
+		if ref != "" {
+			refObj, err := CreateJSONRef(ref)
+			if err != nil {
+				return schema, errors.Wrapf(err, "error extracting name from json tag")
+			}
+			schema.Ref = spec.Ref{refObj}
+			// This was removed because all data is coming from that ref
+			// there is no type called "starexpr" but this is more for knowing
+			// that we need to refernce it directly
+			schema.Type = nil
 		}
-		schema.Ref = spec.Ref{refObj}
-		// This was removed because all data is coming from that ref
-		// there is no type called "starexpr" but this is more for knowing
-		// that we need to refernce it directly
-		schema.Type = nil
 	}
 	return schema, nil
 }
@@ -263,7 +267,7 @@ func CreateOpenAPIDefinition(key, desc string, defs spec.Definitions) {
 
 // Returns string form of the struct field type
 // if the type is not recognized then errors out
-func GetStructFieldType(g interface{}) (string, error) {
+func GetStructFieldType(g interface{}) (string, string, error) {
 	switch v := g.(type) {
 	case *ast.Ident:
 		// normal fields like following are identifiers
@@ -271,7 +275,9 @@ func GetStructFieldType(g interface{}) (string, error) {
 		// Name string `json:"name"`
 		// TODO: handle other types like int or bool
 		if v.Name == "string" {
-			return "string", nil
+			return "string", v.Name, nil
+		} else if v.Name == "int64" {
+			return "integer", v.Name, nil
 		} else {
 			// this could cause problems for types that are identifiers and not string
 			// so not adding it now because fields that are defined in same package
@@ -280,7 +286,7 @@ func GetStructFieldType(g interface{}) (string, error) {
 			// for builtin types keep adding checks in this if block
 			// not adding check for 'PodSpecMod' so that we don't have to
 			// edit this on every new addition of our defined field
-			return "", nil
+			return "", "", nil
 		}
 	case *ast.MapType:
 		// fields like following are of map type
@@ -292,35 +298,42 @@ func GetStructFieldType(g interface{}) (string, error) {
 			// TODO: only checking for string key and value
 			// if needed also add other types of maps
 			if key.Name == "string" && value.Name == "string" {
-				return "object", nil
+				return "object", "", nil
 			} else {
-				return "", fmt.Errorf("map types not string")
+				return "", "", fmt.Errorf("map types not string")
 			}
 		} else {
 			// if maps either key or value is not identifier then
 			// maybe handle it differently
-			return "", fmt.Errorf("map key or value not identifier")
+			return "", "", fmt.Errorf("map key or value not identifier")
 		}
 	case *ast.ArrayType:
 		// e.g.
 		// Ports []ServicePortMod `json:"ports"`
 		// above types are arrays
-		return "array", nil
+		return "array", "", nil
 	case *ast.SelectorExpr:
 		// if the type is from another package then it is of this type
 		// e.g.
 		// api_v1.PersistentVolumeClaimSpec `json:",inline"`
-		return "selectorExpr", nil
+		return "selectorExpr", "", nil
 	case *ast.StarExpr:
 		// A StarExpr node represents an expression of the form "*" Expression.
 		// Semantically it could be a unary "*" expression, or a pointer type.
+
+		// If a base type is pointer that will come up here
+		// e.g. ActiveDeadlineSeconds *int64
+		_, ok := v.X.(*ast.Ident)
+		if ok {
+			return GetStructFieldType(v.X)
+		}
 		// e.g.
 		// ConfigMapRef *ConfigMapEnvSource `json:"configMapRef,omitempty"`
-		return "starexpr", nil
+		return "starexpr", "", nil
 	default:
 		// if none of above is satisfied then it should be added later
 		// so keeping error so that we know that it is missing
-		return "", fmt.Errorf("unknown type could not identify")
+		return "", "", fmt.Errorf("unknown type could not identify")
 	}
 }
 
