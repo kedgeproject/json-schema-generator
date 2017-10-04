@@ -22,5 +22,5 @@ curl -O https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/spe
 kedge-jsonschema > output.json
 
 mkdir -p schema
-openapi2jsonschema output.json -o schema/ --stand-alone
+openapi2jsonschema --strict output.json -o schema/ --stand-alone
 
