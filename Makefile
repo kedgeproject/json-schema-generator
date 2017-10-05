@@ -32,3 +32,7 @@ container-image:
 .PHONY: generate-config
 generate-config:
 	docker run -v `pwd`:/data:Z surajd/kedgeschema
+
+.PHONY: test-generate-config
+test-generate-config:
+	docker run surajd/kedgeschema
