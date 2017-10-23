@@ -4,7 +4,7 @@
 
 This will create OpenAPI configuration for [kedge](https://github.com/kedgeproject/kedge),
 but make sure you have Kubernetes Swagger OpenAPI schema [`swagger.json`](https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json)
-and Kedge [`spec.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/spec.go)
+and Kedge [`types.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/types.go)
 downloaded locally. For detailed steps see [manual steps](https://github.com/kedgeproject/json-schema-generator#doing-it-the-hard-way).
 
 ```bash
@@ -36,11 +36,11 @@ cd $GOPATH/src/github.com/kedgeproject/json-schema-generator
 curl -O https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/json-schema-generator/master/scripts/k8s-release)/api/openapi-spec/swagger.json
 ```
 
-Also we need to download the Kedge [`spec.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/spec.go)
+Also we need to download the Kedge [`types.go`](https://github.com/kedgeproject/kedge/blob/master/pkg/spec/types.go)
 file
 
 ```bash
-curl -O https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/spec.go
+curl -O https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/types.go
 ```
 
 Let's build the binary that generates OpenAPI schema for Kedge

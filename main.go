@@ -29,7 +29,7 @@ import (
 func main() {
 	//log.SetLevel(log.DebugLevel)
 
-	defs, mapping, err := GenerateOpenAPIDefinitions("spec.go")
+	defs, mapping, err := GenerateOpenAPIDefinitions("types.go")
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -15,18 +15,18 @@
 # limitations under the License.
 
 K8S_OPENAPI_URL=https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/json-schema-generator/master/scripts/k8s-release)/api/openapi-spec/swagger.json
-KEDGE_SPEC_URL=https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/spec.go
+KEDGE_SPEC_URL=https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/types.go
 
 echo "Downloading OpenAPI schema of Kubernetes from: $K8S_OPENAPI_URL"
 curl -O $K8S_OPENAPI_URL
 
-# Test if the spec.go exists, if it does don't download the file from URL
-cat spec.go > /dev/null
+# Test if the types.go exists, if it does don't download the file from URL
+cat types.go > /dev/null
 if [ $? -ne 0 ]; then
-	echo "Downloading 'spec.go' from $KEDGE_SPEC_URL"
+	echo "Downloading 'types.go' from $KEDGE_SPEC_URL"
 	curl -O $KEDGE_SPEC_URL
 else
-	echo "'spec.go' already exists."
+	echo "'types.go' already exists."
 fi
 
 echo "Generating OpenAPI schema for Kedge"
