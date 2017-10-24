@@ -19,11 +19,11 @@ all: bin
 
 .PHONY: bin
 bin:
-	go build -o kedge-jsonschema main.go parsego.go
+	go build schemagen.go
 
 .PHONY: install
-install: bin
-	cp kedge-jsonschema $(GOBIN)/
+install:
+	go install schemagen.go
 
 .PHONY: container-image
 container-image:
@@ -36,3 +36,14 @@ generate-config:
 .PHONY: test-generate-config
 test-generate-config:
 	docker run surajd/kedgeschema
+
+.PHONY: install-gotools
+install-gotools:
+	go get github.com/Masterminds/glide
+	go get github.com/sgotti/glide-vc
+
+.PHONY: update-vendor
+update-vendor: install-gotools
+	glide update --strip-vendor
+	glide-vc --only-code --no-tests
+
