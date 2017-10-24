@@ -12,6 +12,7 @@ import (
 var (
 	verbose           bool
 	kedgeSpecLocation string
+	kubernetesSchema  string
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -25,7 +26,7 @@ var RootCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := pkg.Conversion(kedgeSpecLocation); err != nil {
+		if err := pkg.Conversion(kedgeSpecLocation, kubernetesSchema); err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
@@ -42,4 +43,5 @@ func Execute() {
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	RootCmd.Flags().StringVarP(&kedgeSpecLocation, "kedgespec", "k", "types.go", "Specify the location of Kedge spec file")
+	RootCmd.Flags().StringVarP(&kubernetesSchema, "k8sSchema", "s", "swagger.json", "Specify the location of Kuberenetes Schema file")
 }

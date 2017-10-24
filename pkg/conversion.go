@@ -26,16 +26,15 @@ import (
 	"k8s.io/apimachinery/pkg/openapi"
 )
 
-func Conversion(KedgeSpecLocation string) error {
+func Conversion(KedgeSpecLocation, KubernetesSchema string) error {
 	defs, mapping, err := GenerateOpenAPIDefinitions(KedgeSpecLocation)
 	if err != nil {
 		return err
 	}
 
-	filename := "swagger.json"
-	content, err := ioutil.ReadFile(filename)
+	content, err := ioutil.ReadFile(KubernetesSchema)
 	if err != nil {
-		return fmt.Errorf("cannot read file %q: %v\n", filename, err)
+		return fmt.Errorf("cannot read file %q: %v\n", KubernetesSchema, err)
 	}
 
 	api := &openapi.OpenAPIDefinition{}

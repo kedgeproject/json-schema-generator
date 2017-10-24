@@ -8,7 +8,7 @@ schemagen
 # Output of tools
 swagger.json
 output.json
-spec.go
+types.go
 schema
 
 #
