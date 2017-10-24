@@ -1,23 +1,12 @@
-hash: 1989e7a70d5a71d1144e85a5394848a8e40f2c15159f5596c342e40299a3b0da
-updated: 2017-09-01T09:59:39.273604669+05:30
+hash: cd812b8630677e97ea83b73b6f15e24b275be54c4d41629311403fece31e0395
+updated: 2017-10-24T07:25:42.916841648+05:30
 imports:
-- name: github.com/davecgh/go-spew
-  version: 782f4967f2dc4564575ca782fe2d04090b5faca8
-  subpackages:
-  - spew
-- name: github.com/docker/distribution
-  version: cd27f179f2c10c5d300e6d09025b538c475b0d51
-  subpackages:
-  - digest
-  - reference
 - name: github.com/emicklei/go-restful
   version: ff4f55a206334ef123e4f79bbf348980da81ca46
   subpackages:
   - log
 - name: github.com/fatih/structtag
   version: da3d9ab5b78fdc25d3a7614853b085200bd10da9
-- name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-openapi/jsonpointer
   version: 779f45308c19820f1a69e9a4cd965f496e0da10f
 - name: github.com/go-openapi/jsonreference
@@ -26,15 +15,8 @@ imports:
   version: 6aced65f8501fe1217321abf0749d354824ba2ff
 - name: github.com/go-openapi/swag
   version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
-- name: github.com/gogo/protobuf
-  version: c0656edd0d9eab7c66d1eb0c568f9039345796f7
-  subpackages:
-  - proto
-  - sortkeys
-- name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
-- name: github.com/google/gofuzz
-  version: 44d81051d367757e1c7c6a5a86423ece9afcf63c
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/mailru/easyjson
   version: d5b7844b561a7bc640052f1b935f7b800330d7e0
   subpackages:
@@ -44,33 +26,28 @@ imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/PuerkitoBio/purell
-  version: f619812e3caf603a8df60a7ec6f2654b703189ef
+  version: fd18e053af8a4ff11039269006e8037ff374ce0e
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/Sirupsen/logrus
   version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+- name: github.com/spf13/cobra
+  version: 7c674d9e72017ed25f6d2b5e497a1368086b6a6f
 - name: github.com/spf13/pflag
-  version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
-- name: github.com/ugorji/go
-  version: ded73eae5db7e7a0ef6f55aace87a2873c5d2b74
-  subpackages:
-  - codec
+  version: 97afa5e7ca8a08a383cb259e06636b5e2cc7897f
 - name: golang.org/x/crypto
-  version: 81e90905daefcd6fd217b62423c0908922eadb30
+  version: 2509b142fb2b797aa7587dad548f113b2c0f20ce
   subpackages:
   - ssh/terminal
 - name: golang.org/x/net
   version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
-  - html
-  - html/atom
   - http2
   - http2/hpack
   - idna
   - lex/httplex
-  - websocket
 - name: golang.org/x/sys
-  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  version: a1a1f1746d156bbc9954f29134b20ed4ce2752f1
   subpackages:
   - unix
   - windows
@@ -87,62 +64,13 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
-- name: gopkg.in/inf.v0
-  version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
-- name: gopkg.in/yaml.v2
-  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/apimachinery
-  version: 1fd2e63a9a370677308a42f24fd40c86438afddf
+  version: 8ab5f3d8a330c2e9baaf84e39042db8d49034ae2
   subpackages:
-  - pkg/api/equality
-  - pkg/api/meta
-  - pkg/api/resource
-  - pkg/apimachinery
-  - pkg/apimachinery/announced
-  - pkg/apimachinery/registered
-  - pkg/apis/meta/v1
-  - pkg/apis/meta/v1/unstructured
-  - pkg/apis/meta/v1alpha1
-  - pkg/conversion
-  - pkg/conversion/queryparams
-  - pkg/conversion/unstructured
-  - pkg/fields
-  - pkg/labels
   - pkg/openapi
-  - pkg/runtime
-  - pkg/runtime/schema
-  - pkg/runtime/serializer
-  - pkg/runtime/serializer/json
-  - pkg/runtime/serializer/protobuf
-  - pkg/runtime/serializer/recognizer
-  - pkg/runtime/serializer/versioning
-  - pkg/selection
-  - pkg/types
-  - pkg/util/diff
-  - pkg/util/errors
-  - pkg/util/framer
-  - pkg/util/intstr
-  - pkg/util/json
-  - pkg/util/net
-  - pkg/util/rand
-  - pkg/util/runtime
-  - pkg/util/sets
-  - pkg/util/validation
-  - pkg/util/validation/field
-  - pkg/util/wait
-  - pkg/util/yaml
-  - pkg/watch
-  - third_party/forked/golang/reflect
 - name: k8s.io/client-go
   version: d92e8497f71b7b4e0494e5bd204b48d34bd6f254
   subpackages:
-  - pkg/api
   - pkg/api/v1
-  - pkg/apis/apps
-  - pkg/apis/apps/v1beta1
-  - pkg/apis/extensions
   - pkg/apis/extensions/v1beta1
-  - pkg/apis/networking
-  - pkg/util
-  - pkg/util/parsers
 testImports: []

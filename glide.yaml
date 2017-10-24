@@ -1,18 +1,26 @@
-package: github.com/kedgeproject/kedge-jsonschema
+package: github.com/kedgeproject/json-schema-generator
 import:
 - package: github.com/Sirupsen/logrus
   version: v1.0.3
 - package: github.com/fatih/structtag
   version: v0.1.0
 - package: github.com/go-openapi/jsonreference
+  version: 36d33bfe519efae5632669801b180bf1a245da3b
 - package: github.com/go-openapi/spec
+  version: 6aced65f8501fe1217321abf0749d354824ba2ff
+- package: github.com/go-openapi/swag
+  version: 1d0bd113de87027671077d3c71eb3ac5d7dbba72
 - package: github.com/pkg/errors
   version: v0.8.0
 - package: k8s.io/apimachinery
   subpackages:
   - pkg/openapi
+  version: release-1.7
 - package: k8s.io/client-go
   version: v4.0.0
   subpackages:
   - pkg/api/v1
   - pkg/apis/extensions/v1beta1
+
+- package: github.com/spf13/cobra
+  version: 7c674d9e72017ed25f6d2b5e497a1368086b6a6f
