@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package pkg
 
 import (
 	"encoding/json"
@@ -26,24 +26,22 @@ import (
 	"k8s.io/apimachinery/pkg/openapi"
 )
 
-func main() {
-	//log.SetLevel(log.DebugLevel)
-
-	defs, mapping, err := GenerateOpenAPIDefinitions("types.go")
+func Conversion(KedgeSpecLocation string) error {
+	defs, mapping, err := GenerateOpenAPIDefinitions(KedgeSpecLocation)
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	filename := "swagger.json"
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("cannot read file %q: %v\n", filename, err)
+		return fmt.Errorf("cannot read file %q: %v\n", filename, err)
 	}
 
 	api := &openapi.OpenAPIDefinition{}
 	err = json.Unmarshal(content, &api.Schema)
 	if err != nil {
-		log.Fatalf("error unmarshalling into open API definition: %v", err)
+		return fmt.Errorf("error unmarshalling into open API definition: %v", err)
 	}
 
 	defs = InjectKedgeSpec(api.Schema.SchemaProps.Definitions, defs, mapping)
@@ -54,6 +52,7 @@ func main() {
 		api.Schema.SchemaProps.Definitions[k] = v
 	}
 	PrintJSONStdOut(api.Schema)
+	return nil
 }
 
 func augmentProperties(s, t spec.Schema) spec.Schema {

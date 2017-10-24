@@ -30,7 +30,7 @@ else
 fi
 
 echo "Generating OpenAPI schema for Kedge"
-kedge-jsonschema > output.json
+schemagen > output.json
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "OpenAPI schema generation for Kedge failed"
