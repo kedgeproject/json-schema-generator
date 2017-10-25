@@ -52,7 +52,7 @@ make install
 Generate OpenAPI schema for Kedge and save it in `output.json`
 
 ```bash
-kedge-jsonschema > output.json
+schemagen > output.json
 ```
 
 This is just half done, now install a tool called [`openapi2jsonschema`](https://github.com/garethr/openapi2jsonschema).
