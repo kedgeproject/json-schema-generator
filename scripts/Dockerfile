@@ -4,17 +4,16 @@ ADD . /go/src/github.com/kedgeproject/json-schema-generator
 RUN export GOBIN=$GOPATH/bin && cd /go/src/github.com/kedgeproject/json-schema-generator && make install
 
 # final stage
-FROM garethr/openapi2jsonschema
+FROM surajd/openapi2jsonschema:generate-configs-for-kedge
+COPY --from=build-env /go/bin/schemagen /usr/local/sbin/
 
-RUN apk add --update curl && \
-    rm -rf /var/cache/apk/*
-RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+RUN dnf install -y --setopt=tsflags=nodocs npm && \
+	dnf clean all && \
+	npm install -g api-spec-converter --unsafe-perm=true --allow-root 
 
-COPY --from=build-env /go/bin/schemagen /usr/local/bin/
-COPY ./scripts/entrypoint.sh /usr/local/bin/
+COPY ./scripts/entrypoint.sh /usr/local/sbin/
 
 WORKDIR /data
 
-ENTRYPOINT []
-CMD ["/bin/sh", "/usr/local/bin/entrypoint.sh"]
+CMD ["entrypoint.sh"]
  
