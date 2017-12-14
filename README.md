@@ -63,7 +63,7 @@ Once installed run `openapi2jsonschema`
 
 ```bash
 mkdir -p schema
-openapi2jsonschema output.json -o schema/ --stand-alone
+openapi2jsonschema --strict output.json -o schema/ --stand-alone
 ```
 
 Now all the JSONSchemas are generated in `schema` directory. The one that is most important

@@ -26,22 +26,45 @@ import (
 	"k8s.io/apimachinery/pkg/openapi"
 )
 
-func Conversion(KedgeSpecLocation, KubernetesSchema string) error {
-	defs, mapping, err := GenerateOpenAPIDefinitions(KedgeSpecLocation)
-	if err != nil {
-		return err
-	}
+func ParseOpenAPIDefinition(filename string) (*openapi.OpenAPIDefinition, error) {
 
-	content, err := ioutil.ReadFile(KubernetesSchema)
+	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("cannot read file %q: %v\n", KubernetesSchema, err)
+		return nil, fmt.Errorf("cannot read file %q: %v\n", filename, err)
 	}
 
 	api := &openapi.OpenAPIDefinition{}
 	err = json.Unmarshal(content, &api.Schema)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling into open API definition: %v", err)
+		return nil, fmt.Errorf("error unmarshalling in OpenAPI definition: %v", err)
 	}
+	return api, nil
+}
+
+func MergeDefinitions(target, src *openapi.OpenAPIDefinition) {
+	for k, v := range src.Schema.SchemaProps.Definitions {
+		target.Schema.SchemaProps.Definitions[k] = v
+	}
+}
+
+func Conversion(KedgeSpecLocation, KubernetesSchema, OpenShiftSchema string) error {
+	defs, mapping, err := GenerateOpenAPIDefinitions(KedgeSpecLocation)
+	if err != nil {
+		return err
+	}
+
+	k8sApi, err := ParseOpenAPIDefinition(KubernetesSchema)
+	if err != nil {
+		return fmt.Errorf("kubernetes: %v", err)
+	}
+
+	osApi, err := ParseOpenAPIDefinition(OpenShiftSchema)
+	if err != nil {
+		return fmt.Errorf("openshift: %v", err)
+	}
+
+	MergeDefinitions(k8sApi, osApi)
+	api := k8sApi
 
 	defs = InjectKedgeSpec(api.Schema.SchemaProps.Definitions, defs, mapping)
 	//PrintJSONStdOut(defs)
@@ -70,7 +93,10 @@ func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []
 
 		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
-		if m.Target == "io.kedge.DeploymentSpecMod" {
+		switch m.Target {
+		case "io.kedge.DeploymentSpecMod",
+			"io.kedge.DeploymentConfigSpecMod",
+			"io.kedge.JobSpecMod":
 			v := defs[m.Target]
 			var final []string
 			for _, r := range v.Required {

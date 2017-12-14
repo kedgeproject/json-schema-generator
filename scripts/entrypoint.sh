@@ -15,10 +15,13 @@
 # limitations under the License.
 
 K8S_OPENAPI_URL=https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/json-schema-generator/master/scripts/k8s-release)/api/openapi-spec/swagger.json
+OS_OPENAPI_URL=https://raw.githubusercontent.com/openshift/origin/1252cce6daeca1b6cc0fd90b1bde5dcdc9a0853b/api/swagger-spec/oapi-v1.json
 KEDGE_SPEC_URL=https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/types.go
 
 echo "Downloading OpenAPI schema of Kubernetes from: $K8S_OPENAPI_URL"
 curl -O $K8S_OPENAPI_URL
+echo "Downloading Swagger schema of OpenShift from: $OS_OPENAPI_URL"
+curl -O $OS_OPENAPI_URL
 
 # Test if the types.go exists, if it does don't download the file from URL
 cat types.go > /dev/null
@@ -28,6 +31,16 @@ if [ $? -ne 0 ]; then
 else
 	echo "'types.go' already exists."
 fi
+
+echo "Converting Swagger schema for OpenShift to OpenAPI"
+api-spec-converter oapi-v1.json --from=swagger_1 --to=swagger_2 > osv2.json
+exit_status=$?
+if [ $exit_status -ne 0 ]; then
+	echo "Swagger to OpenAPI conversion failed"
+	exit $exit_status
+fi
+
+
 
 echo "Generating OpenAPI schema for Kedge"
 schemagen > output.json

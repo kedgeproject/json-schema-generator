@@ -10,6 +10,8 @@ swagger.json
 output.json
 types.go
 schema
+oapi-v1.json
+osv2.json
 
 #
 # GO SPECIFIC
