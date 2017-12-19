@@ -87,9 +87,9 @@ func augmentProperties(s, t spec.Schema) spec.Schema {
 	return t
 }
 
-func InjectKedgeSpec(k8sSpec spec.Definitions, defs spec.Definitions, mapping []Injection) spec.Definitions {
+func InjectKedgeSpec(apiDef spec.Definitions, defs spec.Definitions, mapping []Injection) spec.Definitions {
 	for _, m := range mapping {
-		defs[m.Target] = augmentProperties(k8sSpec[m.Source], defs[m.Target])
+		defs[m.Target] = augmentProperties(apiDef[m.Source], defs[m.Target])
 
 		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
