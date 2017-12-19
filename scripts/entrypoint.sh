@@ -17,33 +17,29 @@
 K8S_OPENAPI_URL=https://raw.githubusercontent.com/kubernetes/kubernetes/$(curl https://raw.githubusercontent.com/kedgeproject/json-schema-generator/master/scripts/k8s-release)/api/openapi-spec/swagger.json
 OS_OPENAPI_URL=https://raw.githubusercontent.com/openshift/origin/1252cce6daeca1b6cc0fd90b1bde5dcdc9a0853b/api/swagger-spec/oapi-v1.json
 KEDGE_SPEC_URL=https://raw.githubusercontent.com/kedgeproject/kedge/master/pkg/spec/types.go
+K8S_OPENAPI_FILE=k8s-oapi.json
+OS_OPENAPI_V1_FILE=os-oapiv1.json
+OS_OPENAPI_FILE=os-oapi.json
+KEDGE_SPEC_FILE=kedge-types.go
+KEDGE_OPENAPI_FILE=kedge-oapi.json
 
 echo "Downloading OpenAPI schema of Kubernetes from: $K8S_OPENAPI_URL"
-curl -O $K8S_OPENAPI_URL
+curl -o $K8S_OPENAPI_FILE -z $K8S_OPENAPI_FILE $K8S_OPENAPI_URL
 echo "Downloading Swagger schema of OpenShift from: $OS_OPENAPI_URL"
-curl -O $OS_OPENAPI_URL
-
-# Test if the types.go exists, if it does don't download the file from URL
-cat types.go > /dev/null
-if [ $? -ne 0 ]; then
-	echo "Downloading 'types.go' from $KEDGE_SPEC_URL"
-	curl -O $KEDGE_SPEC_URL
-else
-	echo "'types.go' already exists."
-fi
+curl -o $OS_OPENAPI_V1_FILE -z $OS_OPENAPI_V1_FILE $OS_OPENAPI_URL
+echo "Download Kedge types from: $KEDGE_SPEC_URL"
+curl -o $KEDGE_SPEC_FILE -z $KEDGE_SPEC_FILE $KEDGE_SPEC_URL
 
 echo "Converting Swagger schema for OpenShift to OpenAPI"
-api-spec-converter oapi-v1.json --from=swagger_1 --to=swagger_2 > osv2.json
+api-spec-converter $OS_OPENAPI_V1_FILE --from=swagger_1 --to=swagger_2 > $OS_OPENAPI_FILE
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "Swagger to OpenAPI conversion failed"
 	exit $exit_status
 fi
 
-
-
 echo "Generating OpenAPI schema for Kedge"
-schemagen > output.json
+schemagen --kedgespec $KEDGE_SPEC_FILE --k8sSchema $K8S_OPENAPI_FILE --osSchema $OS_OPENAPI_FILE > $KEDGE_OPENAPI_FILE
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "OpenAPI schema generation for Kedge failed"
@@ -52,7 +48,7 @@ fi
 
 echo "Generating JSONSchema for Kedge"
 mkdir -p schema
-openapi2jsonschema --strict output.json -o schema/ --stand-alone
+openapi2jsonschema --strict $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "Kedge JSONSchema generation failed"
