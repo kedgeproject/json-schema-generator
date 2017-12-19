@@ -90,9 +90,9 @@ func InjectKedgeSpec(koDefinitions spec.Definitions, kedgeDefinitions spec.Defin
 	for _, m := range mappings {
 		kedgeDefinitions[m.Target] = augmentProperties(koDefinitions[m.Source], kedgeDefinitions[m.Target])
 
+		switch m.Target {
 		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
-		switch m.Target {
 		case "io.kedge.DeploymentSpecMod",
 			"io.kedge.DeploymentConfigSpecMod",
 			"io.kedge.JobSpecMod":
@@ -105,6 +105,15 @@ func InjectKedgeSpec(koDefinitions spec.Definitions, kedgeDefinitions spec.Defin
 			}
 			v.Required = final
 			kedgeDefinitions[m.Target] = v
+		case "io.kedge.ContainerSpec":
+			containerDef := kedgeDefinitions[m.Target]
+			for i, r := range containerDef.Required {
+				if r == "name" {
+					containerDef.Required[i] = containerDef.Required[len(containerDef.Required)-1]
+					containerDef.Required = containerDef.Required[:len(containerDef.Required)-1]
+				}
+			}
+			kedgeDefinitions[m.Target] = containerDef
 		}
 	}
 	return kedgeDefinitions
