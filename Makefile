@@ -27,15 +27,15 @@ install:
 
 .PHONY: container-image
 container-image:
-	docker build -t surajd/kedgeschema -f ./scripts/Dockerfile .
+	docker build -t kedge/kedgeschema -f ./scripts/Dockerfile .
 
 .PHONY: generate-config
 generate-config:
-	docker run -v `pwd`:/data:Z surajd/kedgeschema
+	docker run -v `pwd`:/data:Z kedge/kedgeschema
 
 .PHONY: test-generate-config
 test-generate-config:
-	docker run surajd/kedgeschema
+	docker run kedge/kedgeschema
 
 .PHONY: install-gotools
 install-gotools:
