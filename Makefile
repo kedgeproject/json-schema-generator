@@ -47,3 +47,7 @@ update-vendor: install-gotools
 	glide update --strip-vendor
 	glide-vc --only-code --no-tests
 
+.PHONY: generate-config-local
+generate-config-local: install
+	mkdir -p _output
+	cd _output && ../scripts/entrypoint.sh
