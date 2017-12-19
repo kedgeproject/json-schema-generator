@@ -67,7 +67,6 @@ func Conversion(KedgeSpecLocation, KubernetesSchema, OpenShiftSchema string) err
 	api := k8sApi
 
 	defs = InjectKedgeSpec(api.Schema.SchemaProps.Definitions, defs, mapping)
-	//PrintJSONStdOut(defs)
 
 	// add defs to openapi
 	for k, v := range defs {
