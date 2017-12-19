@@ -86,9 +86,9 @@ func augmentProperties(s, t spec.Schema) spec.Schema {
 	return t
 }
 
-func InjectKedgeSpec(apiDef spec.Definitions, defs spec.Definitions, mapping []Injection) spec.Definitions {
-	for _, m := range mapping {
-		defs[m.Target] = augmentProperties(apiDef[m.Source], defs[m.Target])
+func InjectKedgeSpec(koDefinitions spec.Definitions, kedgeDefinitions spec.Definitions, mappings []Injection) spec.Definitions {
+	for _, m := range mappings {
+		kedgeDefinitions[m.Target] = augmentProperties(koDefinitions[m.Source], kedgeDefinitions[m.Target])
 
 		// special case, where if the key is io.kedge.DeploymentSpec
 		// ignore the required field called template
@@ -96,7 +96,7 @@ func InjectKedgeSpec(apiDef spec.Definitions, defs spec.Definitions, mapping []I
 		case "io.kedge.DeploymentSpecMod",
 			"io.kedge.DeploymentConfigSpecMod",
 			"io.kedge.JobSpecMod":
-			v := defs[m.Target]
+			v := kedgeDefinitions[m.Target]
 			var final []string
 			for _, r := range v.Required {
 				if r != "template" {
@@ -104,10 +104,10 @@ func InjectKedgeSpec(apiDef spec.Definitions, defs spec.Definitions, mapping []I
 				}
 			}
 			v.Required = final
-			defs[m.Target] = v
+			kedgeDefinitions[m.Target] = v
 		}
 	}
-	return defs
+	return kedgeDefinitions
 }
 
 func PrintJSONStdOut(v interface{}) {
