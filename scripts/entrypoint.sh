@@ -48,7 +48,7 @@ fi
 
 echo "Generating JSONSchema for Kedge"
 mkdir -p schema
-openapi2jsonschema --strict $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
+openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "Kedge JSONSchema generation failed"
