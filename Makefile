@@ -56,3 +56,7 @@ generate-config-local: install
 generate-config-local-strict: install
 	mkdir -p _output
 	cd _output && ../scripts/entrypoint.sh --strict
+
+.PHONY: clean-output
+clean-output:
+	rm -rf _output
