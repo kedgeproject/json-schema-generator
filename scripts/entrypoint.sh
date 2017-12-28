@@ -54,9 +54,9 @@ if [ "$1" == "--strict" ]; then
 fi
 mkdir -p schema
 if [ "$STRICT" = true ]; then
-	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone --strict
+	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone --strict --kubernetes
 else
-	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
+	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone --kubernetes
 fi
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
