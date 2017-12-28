@@ -51,3 +51,8 @@ update-vendor: install-gotools
 generate-config-local: install
 	mkdir -p _output
 	cd _output && ../scripts/entrypoint.sh
+
+.PHONY: generate-config-local-strict
+generate-config-local-strict: install
+	mkdir -p _output
+	cd _output && ../scripts/entrypoint.sh --strict

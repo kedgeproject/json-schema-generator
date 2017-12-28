@@ -22,6 +22,7 @@ OS_OPENAPI_V1_FILE=os-oapiv1.json
 OS_OPENAPI_FILE=os-oapi.json
 KEDGE_SPEC_FILE=kedge-types.go
 KEDGE_OPENAPI_FILE=kedge-oapi.json
+STRICT=false
 
 echo "Downloading OpenAPI schema of Kubernetes from: $K8S_OPENAPI_URL"
 curl -o $K8S_OPENAPI_FILE -z $K8S_OPENAPI_FILE $K8S_OPENAPI_URL
@@ -47,8 +48,16 @@ if [ $exit_status -ne 0 ]; then
 fi
 
 echo "Generating JSONSchema for Kedge"
+if [ "$1" == "--strict" ]; then
+	echo "Setting strict mode for JSON Schema conversion"
+	STRICT=true
+fi
 mkdir -p schema
-openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
+if [ "$STRICT" = true ]; then
+	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone --strict
+else
+	openapi2jsonschema $KEDGE_OPENAPI_FILE -o schema/ --stand-alone
+fi
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
 	echo "Kedge JSONSchema generation failed"
