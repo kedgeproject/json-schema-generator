@@ -79,7 +79,7 @@ func GenerateOpenAPIDefinitions(filename string) (spec.Definitions, []Injection,
 	for _, s := range mapping {
 		log.Debugln(s.Target, "-", s.Source)
 	}
-	PrintJSON(defs)
+	LogJson(defs)
 
 	return defs, mapping, nil
 }
@@ -441,10 +441,18 @@ func ParseStructComments(cg *ast.CommentGroup) (kedgeSpecKey, desc string) {
 	return kedgeSpecKey, strings.TrimSpace(desc)
 }
 
-func PrintJSON(v interface{}) {
+func LogJson(v interface{}) {
 	b, e := json.MarshalIndent(v, "", "  ")
 	if e != nil {
 		log.Fatalln(e)
 	}
 	log.Debugln(string(b))
+}
+
+func PrintJson(v interface{}) {
+	b, e := json.MarshalIndent(v, "", "  ")
+	if e != nil {
+		log.Fatalln(e)
+	}
+	fmt.Println(string(b))
 }
