@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+CONTAINERIMAGE=containscafeine/kedge-json-schema:latest
+
 default: bin
 
 .PHONY: all
@@ -27,15 +29,16 @@ install:
 
 .PHONY: container-image
 container-image:
-	docker build -t kedge/kedgeschema -f ./scripts/Dockerfile .
+	docker build -t ${CONTAINERIMAGE} -f ./scripts/Dockerfile .
 
 .PHONY: generate-config
 generate-config:
-	docker run -v `pwd`:/data:Z kedge/kedgeschema
+	mkdir -p _output
+	cd _output && docker run --rm -v `pwd`:/data:Z ${CONTAINERIMAGE}
 
 .PHONY: test-generate-config
 test-generate-config:
-	docker run kedge/kedgeschema
+	docker run ${CONTAINERIMAGE}
 
 .PHONY: install-gotools
 install-gotools:
