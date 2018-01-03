@@ -47,7 +47,7 @@ func MergeDefinitions(target, src *openapi.OpenAPIDefinition) {
 	}
 }
 
-func Conversion(KedgeSpecLocation, KubernetesSchema, OpenShiftSchema string) error {
+func Conversion(KedgeSpecLocation, KubernetesSchema, OpenShiftSchema string, controllerOnly bool) error {
 	defs, mapping, err := GenerateOpenAPIDefinitions(KedgeSpecLocation)
 	if err != nil {
 		return err
@@ -72,8 +72,24 @@ func Conversion(KedgeSpecLocation, KubernetesSchema, OpenShiftSchema string) err
 	for k, v := range defs {
 		api.Schema.SchemaProps.Definitions[k] = v
 	}
+
+	if controllerOnly {
+		retainOnlyControllers(api.Schema.Definitions)
+	}
+
 	PrintJSONStdOut(api.Schema)
 	return nil
+}
+
+func retainOnlyControllers(definitions spec.Definitions) {
+	for k := range definitions {
+		switch k {
+		case "io.kedge.DeploymentSpecMod", "io.kedge.DeploymentConfigSpecMod", "io.kedge.JobSpecMod":
+			continue
+		default:
+			delete(definitions, k)
+		}
+	}
 }
 
 func augmentProperties(s, t spec.Schema) spec.Schema {
