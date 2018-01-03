@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CONTAINERIMAGE=containscafeine/kedge-json-schema:latest
+CONTAINERIMAGE=kedge/json-schema-generator:latest
 
 default: bin
 
