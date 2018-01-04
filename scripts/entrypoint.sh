@@ -64,4 +64,8 @@ if [ $exit_status -ne 0 ]; then
 	exit $exit_status
 fi
 
+echo "Copying controller JSON Schema files to controllers/ directory"
+mkdir -p controllers
+cp -rv schema/{deploymentconfigspecmod.json,jobspecmod.json,deploymentspecmod.json} controllers/
+
 echo "Kedge JSONSchema generated successfully"
