@@ -14,7 +14,6 @@ var (
 	kedgeSpecLocation string
 	kubernetesSchema  string
 	openshiftSchema   string
-	isController      bool
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -28,7 +27,7 @@ var RootCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := pkg.Conversion(kedgeSpecLocation, kubernetesSchema, openshiftSchema, isController); err != nil {
+		if err := pkg.Conversion(kedgeSpecLocation, kubernetesSchema, openshiftSchema); err != nil {
 			fmt.Println(err)
 			os.Exit(-1)
 		}
@@ -47,5 +46,4 @@ func init() {
 	RootCmd.Flags().StringVarP(&kedgeSpecLocation, "kedgespec", "k", "types.go", "Specify the location of Kedge spec file")
 	RootCmd.Flags().StringVarP(&kubernetesSchema, "k8sSchema", "s", "swagger.json", "Specify the location of Kuberenetes Schema file")
 	RootCmd.Flags().StringVarP(&openshiftSchema, "osSchema", "o", "osv2.json", "Specify the location of OpenShift schema file")
-	RootCmd.Flags().BoolVarP(&isController, "controller", "c", true, "output only controller specific definitions")
 }
